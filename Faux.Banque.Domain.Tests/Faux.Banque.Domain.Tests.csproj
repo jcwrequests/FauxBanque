@@ -38,6 +38,18 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Akka">
+      <HintPath>..\packages\Akka.0.7.0\lib\net45\Akka.dll</HintPath>
+    </Reference>
+    <Reference Include="Akka.TestKit">
+      <HintPath>..\packages\Akka.TestKit.0.7.0\lib\net45\Akka.TestKit.dll</HintPath>
+    </Reference>
+    <Reference Include="Akka.TestKit.VsTest">
+      <HintPath>..\packages\Akka.TestKit.VsTest.0.7.0\lib\net45\Akka.TestKit.VsTest.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -59,12 +71,16 @@
     <Compile Include="EventStore\InMemoryEventStore.cs" />
     <Compile Include="CustomerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="CustomerActorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Faux.Banque.Domain\Faux.Banque.Domain.csproj">
       <Project>{3ea44e04-8983-4544-8213-88dedeb845b0}</Project>
       <Name>Faux.Banque.Domain</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -9,11 +9,13 @@ using System.Linq;
 
 namespace Faux.Banque.Domain.Tests
 {
+    
     [TestClass]
     public class CustomerTests
     {
         static InMemoryEventStore store = new InMemoryEventStore();
 
+        [TestCategory("DDD")]
         [TestMethod]
         public void Create_Customer()
         {
@@ -24,6 +26,7 @@ namespace Faux.Banque.Domain.Tests
             CustomerState state = new CustomerState(stream.Events);
             Assert.IsTrue(state.CustomerId.Equals(id));
         }
+        [TestCategory("DDD")]
         [TestMethod]
         public void Create_Customer_And_Open_A_SavingsAcccount()
         {
@@ -37,6 +40,7 @@ namespace Faux.Banque.Domain.Tests
             Assert.IsTrue(state.Accounts.First().Value.TotalBalance.Equals(100));
 
         }
+        [TestCategory("DDD")]
         [TestMethod]
         public void Create_Customer_And_Open_Two_Accounts()
         {
@@ -51,6 +55,7 @@ namespace Faux.Banque.Domain.Tests
             Assert.IsTrue(state.CustomerId.Equals(id));
             Assert.IsTrue(state.Accounts.Sum(a => a.Value.TotalBalance).Equals(200));
         }
+        [TestCategory("DDD")]
         [TestMethod]
         public void Create_Customer_And_Open_Two_Accounts_Then_Transfer_Money()
         {
@@ -69,5 +74,6 @@ namespace Faux.Banque.Domain.Tests
             Assert.IsTrue(state.Accounts[new AccountId("13")].TotalBalance.Equals(200));
 
         }
+       
     }
 }
