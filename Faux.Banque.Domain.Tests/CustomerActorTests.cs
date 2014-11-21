@@ -18,10 +18,23 @@ namespace Faux.Banque.Domain.Tests
 
         [TestCategory("Actors")]
         [TestMethod]
-        public void Create_Customer()
+        public void Create_Customer_Using_Receive_Actor()
         {
             
             var actor = ActorOfAsTestActorRef<CustomerActor>(() => new CustomerActor(store), "cusomters");
+
+            CustomerId id = new CustomerId("1");
+            actor.Tell(new CreateCustomer("John", "Smith", id));
+            Storage.EventStream stream = store.LoadEventStream(id);
+            CustomerState state = new CustomerState(stream.Events);
+            Assert.IsTrue(state.CustomerId.Equals(id));
+        }
+
+        [TestCategory("Actors")]
+        [TestMethod]
+        public void Create_Customer_Using_Typed_Actor()
+        {
+            var actor = ActorOfAsTestActorRef<CustomerActorTyped>(() => new CustomerActorTyped(store), "cusomters");
 
             CustomerId id = new CustomerId("1");
             actor.Tell(new CreateCustomer("John", "Smith", id));
