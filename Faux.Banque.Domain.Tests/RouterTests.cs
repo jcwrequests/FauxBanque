@@ -6,12 +6,15 @@ using Akka.Actor;
 using Akka.Configuration;
 using Faux.Banque.Domain.ValueObjects;
 using Faux.Banque.Domain.Contacts;
+using Faux.Banque.Domain.Tests.EventStore;
 
 namespace Faux.Banque.Domain.Tests
 {
     [TestClass]
     public class RouterTests
     {
+        static InMemoryEventStore store = new InMemoryEventStore();
+
         [TestMethod]
         public void WireUpConistentHash()
         {
@@ -26,10 +29,10 @@ routees.paths = [
 
             using(var system = ActorSystem.Create("MySystem"))
             {
-                system.ActorOf<CustomerActorTyped>("Worker1");
-                system.ActorOf<CustomerActorTyped>("Worker2");
-                system.ActorOf<CustomerActorTyped>("Worker3");
-                system.ActorOf<CustomerActorTyped>("Worker4");
+                system.ActorOf(Props.Create(() => new CustomerActorTyped(store)), "Worker1");
+                system.ActorOf(Props.Create(() => new CustomerActorTyped(store)), "Worker2");
+                system.ActorOf(Props.Create(() => new CustomerActorTyped(store)), "Worker3");
+                system.ActorOf(Props.Create(() => new CustomerActorTyped(store)), "Worker4");
 
                 var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
                 CustomerId id = new CustomerId("1");
