@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\CustomerActor.cs" />
+    <Compile Include="Actors\CustomerActorTyped.cs" />
     <Compile Include="Aggregates\Customer.cs" />
     <Compile Include="Aggregates\CustomerApplicationService.cs" />
     <Compile Include="Aggregates\CustomerState.cs" />
