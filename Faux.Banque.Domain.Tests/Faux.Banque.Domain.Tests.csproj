@@ -68,6 +68,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="Example.cs" />
     <Compile Include="EventStore\InMemoryEventStore.cs" />
     <Compile Include="CustomerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
