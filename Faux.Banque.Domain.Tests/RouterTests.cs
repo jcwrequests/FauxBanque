@@ -9,6 +9,7 @@ using Faux.Banque.Domain.Contacts;
 using Faux.Banque.Domain.Tests.EventStore;
 using System.Threading.Tasks;
 using Faux.Banque.Domain.Aggregates;
+using System.Dynamic;
 
 namespace Faux.Banque.Domain.Tests
 {
@@ -80,12 +81,58 @@ routees.paths = [
                         {
                             Name = Guid.NewGuid().ToString(),
                             Id = j,
+
                         };
 
-                        hashGroup.Tell(message);
+                        dynamic msg = new System.Dynamic.ExpandoObject();
+                        msg.Name = Guid.NewGuid().ToString();
+                        msg.Id = j;
+
+                        var envelope = new ConsistentHashableEnvelope(msg, msg.Id);
+                        //hashGroup.Tell(message);
+                        hashGroup.Tell(envelope);
                     }
                 }
                 
+            }
+        }
+
+        [TestMethod]
+        public void ConistentHashTestExampleWithTypedWorkers()
+        {
+            var config = ConfigurationFactory.ParseString(@"
+routees.paths = [
+    ""akka://MySystem/user/Worker1"" #testing full path
+    user/Worker2
+    user/Worker3
+    user/Worker4
+]");
+
+            using (var system = ActorSystem.Create("MySystem"))
+            {
+                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker1");
+                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker2");
+                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker3");
+                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker4");
+
+                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+                Task.Delay(500).Wait();
+
+                for (var i = 0; i < 5; i++)
+                {
+                    for (var j = 0; j < 7; j++)
+                    {
+
+                        TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
+                       
+                        var envelope = new ConsistentHashableEnvelope(msg, msg.Id);
+
+                        hashGroup.Tell(msg);
+                        hashGroup.Tell(envelope);
+                    
+                    }
+                }
+
             }
         }
         

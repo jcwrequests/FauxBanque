@@ -47,6 +47,7 @@
     <Reference Include="Akka.TestKit.VsTest">
       <HintPath>..\packages\Akka.TestKit.VsTest.0.7.0\lib\net45\Akka.TestKit.VsTest.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>

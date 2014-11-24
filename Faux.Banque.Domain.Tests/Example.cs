@@ -30,4 +30,31 @@ namespace Faux.Banque.Domain.Tests
             Console.WriteLine("{0} received {1}", Self.Path.Name, message);
         }
     }
+    public class TypedActorMessage : ConsistentHashable
+    {
+        public string Name { get; set; }
+        public int Id { get; set; }
+
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Id, Name);
+        }
+
+        public object ConsistentHashKey
+        {
+            get { return Id; }
+        }
+    }
+
+    
+    public class TypedWorker : TypedActor, IHandle<TypedActorMessage>
+    {
+
+        public void Handle(TypedActorMessage message)
+        {
+            Console.WriteLine("{0} received {1}", Self.Path.Name, message);
+        }
+
+        
+    }
 }
