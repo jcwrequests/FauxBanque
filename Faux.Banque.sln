@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Faux.Banque.Domain", "Faux.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Faux.Banque.Domain.Tests", "Faux.Banque.Domain.Tests\Faux.Banque.Domain.Tests.csproj", "{78C60E34-DECA-44E4-8C1C-85512E37B31B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fauux.Banque.Harness", "Fauux.Banque.Harness\Fauux.Banque.Harness.csproj", "{F3CC05D1-96A5-4CA1-A969-3A5322C8D5B0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{78C60E34-DECA-44E4-8C1C-85512E37B31B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78C60E34-DECA-44E4-8C1C-85512E37B31B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78C60E34-DECA-44E4-8C1C-85512E37B31B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3CC05D1-96A5-4CA1-A969-3A5322C8D5B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3CC05D1-96A5-4CA1-A969-3A5322C8D5B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3CC05D1-96A5-4CA1-A969-3A5322C8D5B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3CC05D1-96A5-4CA1-A969-3A5322C8D5B0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

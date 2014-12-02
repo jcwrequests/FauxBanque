@@ -114,8 +114,9 @@ routees.paths = [
                 system.ActorOf(Props.Create(() => new TypedWorker()), "Worker2");
                 system.ActorOf(Props.Create(() => new TypedWorker()), "Worker3");
                 system.ActorOf(Props.Create(() => new TypedWorker()), "Worker4");
-
+                
                 var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+               
                 Task.Delay(500).Wait();
 
                 for (var i = 0; i < 5; i++)
@@ -124,8 +125,9 @@ routees.paths = [
                     {
 
                         TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
-                       
-                        var envelope = new ConsistentHashableEnvelope(msg, msg.Id);
+                        AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
+
+                        var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
                         hashGroup.Tell(msg);
                         hashGroup.Tell(envelope);

@@ -22,7 +22,7 @@ namespace Faux.Banque.Domain.Actors
 
         public CustomerActorTyped(IEventStore eventStore)
         {
-            if (eventStore == null) throw new ArgumentNullException("eventStore");
+             if (eventStore == null) throw new ArgumentNullException("eventStore");
             this.eventStore = eventStore;
         }
 
@@ -31,6 +31,7 @@ namespace Faux.Banque.Domain.Actors
             Customer customer = GetCustomer(message.CustomerId);
             customer.CreateCustomer(message.CustomerId, message.FirstName, message.LastName);
             AppendToStream(message.CustomerId, customer);
+            
         }
 
         public void Handle(OpenSavingsAccount message)
@@ -65,5 +66,6 @@ namespace Faux.Banque.Domain.Actors
             EventStream eventStream = eventStore.LoadEventStream(customerId);
             eventStore.AppendToStream(customerId, eventStream.Version, customer.Changes);
         }
+
     }
 }

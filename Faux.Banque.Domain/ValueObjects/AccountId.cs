@@ -26,6 +26,6 @@ namespace Faux.Banque.Domain.ValueObjects
         {
             return Value.GetHashCode();
         }
-        
+
     }
 }

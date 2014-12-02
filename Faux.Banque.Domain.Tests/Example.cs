@@ -45,9 +45,20 @@ namespace Faux.Banque.Domain.Tests
             get { return Id; }
         }
     }
+    public class AnotherMessage 
+    {
+        public string Name { get; set; }
+        public int Id { get; set; }
 
+        public override string ToString()
+        {
+            return string.Format("{0} {1}", Id, Name);
+        }
+
+        
+    }
     
-    public class TypedWorker : TypedActor, IHandle<TypedActorMessage>
+    public class TypedWorker : TypedActor, IHandle<TypedActorMessage>, IHandle<AnotherMessage>
     {
 
         public void Handle(TypedActorMessage message)
@@ -55,6 +66,10 @@ namespace Faux.Banque.Domain.Tests
             Console.WriteLine("{0} received {1}", Self.Path.Name, message);
         }
 
-        
+
+        public void Handle(AnotherMessage message)
+        {
+            Console.WriteLine("{0} received other {1}", Self.Path.Name, message);
+        }
     }
 }
