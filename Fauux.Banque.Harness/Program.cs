@@ -62,18 +62,23 @@ routees.paths = [
         }
         static void Container()
         {
+            var config = ConfigurationFactory.ParseString(@"
+            routees.paths = [
+                ""akka://MySystem/user/Worker1"" #testing full path
+                ]");
+
             IWindsorContainer container = new WindsorContainer();
             container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
-            container.Register(Component.For<ActorSystem>());
+            //container.Register(Component.For<ActorSystem>());
 
-            ApplicationConfig appConfig = new ApplicationConfig(container);
+            ApplicationConfig appConfig = new ApplicationConfig(container,config);
             var system = appConfig.actorSystem("Test");
 
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).props("TypedWorker"), "Worker");
-            var config = ConfigurationFactory.ParseString(@"
-routees.paths = [
-    ""akka://MySystem/user/Worker1"" #testing full path
-    ]");
+            ///system.ActorOf(Props.Create(() => container.Resolve<TypedWorker>()),)
+            ///
+            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker1");
+     
+            
 
             var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
@@ -94,7 +99,7 @@ routees.paths = [
 
                 }
             }
-
+            Console.ReadLine();
         }
     }
 }

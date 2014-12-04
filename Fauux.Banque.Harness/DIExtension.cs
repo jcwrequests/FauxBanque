@@ -12,55 +12,71 @@ namespace Fauux.Banque.Harness
     {
         //Need to Create Implementation of the applicatonContext
         private IWindsorContainer container;
+        private Akka.Configuration.Config config;
+        
 
         public ApplicationConfig(IWindsorContainer container)
         {
+            // TODO: Complete member initialization
             this.container = container;
+        }
+
+        public ApplicationConfig(IWindsorContainer container, Akka.Configuration.Config config)
+        {
+            // TODO: Complete member initialization
+            this.container = container;
+            this.config = config;
         }
         public ActorSystem actorSystem(string SystemName)
         {
-            var system = ActorSystem.Create(SystemName);
+            
+            var system = ActorSystem.Create(SystemName,config);
             system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
-            DIExtension.DIExtensionProvider.Get(system).initialize(this);
+        
+
+
+            DIExtension.DIExtensionProvider.Get(system).Initialize(this);
             return system;
         }                                                                                                
 
         public Type GetType(string ActorName)
         {
-            return Type.GetType(ActorName);
-        }
-
-        public ActorBase CreateActor(string ActorName)
-        {
-            Type actorType =
+            return 
                 container.
                 Kernel.
                 GetAssignableHandlers(typeof(object)).
                 Where(handler => handler.ComponentModel.Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
                 Select(handler => handler.ComponentModel.Implementation).
                 FirstOrDefault();
-            
-            return (ActorBase)container.Resolve(actorType);
         }
+
+        public Func<ActorBase> CreateActor(string ActorName)
+        {
+           
+            return () => (ActorBase)container.Resolve(GetType(ActorName));
+        }
+
+
+         
     }
 
     public interface IApplicationContext
     {
         Type GetType(string ActorName);
-        ActorBase CreateActor(string ActorName);
+        Func<ActorBase> CreateActor(string ActorName);
     }
 
     public class DIExt : IExtension
     {
         private IApplicationContext applicationContext;
 
-        public void initialize(IApplicationContext applicationContext)
+        public void Initialize(IApplicationContext applicationContext)
         {
             this.applicationContext = applicationContext;
         }
-        public Props props(String actorName)
+        public Props Props(String actorName)
         {
-            return new Props(typeof(DIActorProducerClass), new object[] { applicationContext, actorName });
+            return new Props(typeof(DIActorProducerClass),  new object[] { applicationContext, actorName });
         }
 
     }
@@ -79,7 +95,7 @@ namespace Fauux.Banque.Harness
     {
         private IApplicationContext applicationContext;
         private string actorName;
-        readonly ActorBase myActor;
+        readonly Func<ActorBase> myActor;
 
         public DIActorProducerClass(IApplicationContext applicationContext,
                                     string actorName)
@@ -90,12 +106,13 @@ namespace Fauux.Banque.Harness
         }
         public Type ActorType
         {
-            get { return myActor.GetType(); }
+            get { return this.applicationContext.GetType(this.actorName); }
         }
 
         public ActorBase Produce()
         {
-            return myActor;
+            return myActor();
         }
+        
     }
 }
