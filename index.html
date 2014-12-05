@@ -1,0 +1,116 @@
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Faux Banque</title>
+  <meta name="description" content="">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Faux Banque</h1>
+    </header>
+    <div id="container">
+      <p class="tagline"></p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/jcwrequests/FauxBanque/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/jcwrequests/FauxBanque/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/jcwrequests/FauxBanque" class="code">View Faux Banque on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h3>
+<a id="faux-banque-is-a-experimental-place-for-learning-how-to-use-akka-dot-net-with-domain-driven-design-ddd-along-with-experimenting-with-ddd-aggregate-design-it-also-provides-an-example-of-how-to-implement-an-akka-extension-to-provide-depenency-injection-using-a-windsorcontainer" class="anchor" href="#faux-banque-is-a-experimental-place-for-learning-how-to-use-akka-dot-net-with-domain-driven-design-ddd-along-with-experimenting-with-ddd-aggregate-design-it-also-provides-an-example-of-how-to-implement-an-akka-extension-to-provide-depenency-injection-using-a-windsorcontainer" aria-hidden="true"><span class="octicon octicon-link"></span></a>Faux Banque is a experimental place for learning how to use <a href="http://akkadotnet.github.io/">Akka Dot Net</a> with Domain Driven Design (DDD). Along with experimenting with DDD Aggregate design it also provides an example of how to implement an <a href="http://doc.akka.io/docs/akka/snapshot/scala/extending-akka.html">Akka Extension</a> to provide depenency injection using a WindsorContainer.</h3>
+
+<p>My IOC example is based on a translation of a Java implementation using the Spring Framework. The Java code <a href="https://github.com/typesafehub/activator-akka-java-spring/tree/master/src/main/java/sample">Spring Implementation</a> is an excellent source of information if you are attempting to write your own version from scratch. If you want to use my implementation with a different container refer to the <a href="https://github.com/jcwrequests/FauxBanque/blob/master/Fauux.Banque.Harness/DIExtension.cs">ApplicationConfig class</a> and create your own implementation. </p>
+
+<pre><code> public class ApplicationConfig : IApplicationContext
+ {
+    private IWindsorContainer container;
+    private Akka.Configuration.Config config;
+
+    public ApplicationConfig(IWindsorContainer container)
+    {
+        this.container = container;
+    }
+
+    public ApplicationConfig(IWindsorContainer container, 
+                             Akka.Configuration.Config config)
+    {
+        this.container = container;
+        this.config = config;
+    }
+    public ActorSystem actorSystem(string SystemName)
+    {
+
+        var system = ActorSystem.Create(SystemName,config);
+        system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
+
+        DIExtension.DIExtensionProvider.Get(system).Initialize(this);
+        return system;
+    }                                                                                                
+
+    public Type GetType(string ActorName)
+    {
+        return 
+            container.
+            Kernel.
+            GetAssignableHandlers(typeof(object)).
+            Where(handler =&gt; handler.
+                             ComponentModel.
+                             Name.
+                             Equals(ActorName,
+                                    StringComparison.InvariantCultureIgnoreCase)).
+            Select(handler =&gt; handler.ComponentModel.Implementation).
+            FirstOrDefault();
+    }
+
+    public Func&lt;ActorBase&gt; CreateActor(string ActorName)
+    {
+        return () =&gt; (ActorBase)container.Resolve(GetType(ActorName));
+    }
+
+
+
+}
+</code></pre>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/jcwrequests" class="avatar"><img src="https://avatars3.githubusercontent.com/u/2295427?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/jcwrequests">jcwrequests</a> maintains <a href="https://github.com/jcwrequests/FauxBanque">Faux Banque</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/jcwrequests/FauxBanque/tarball/master" class="tar">tar</a><a href="https://github.com/jcwrequests/FauxBanque/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
+
+  
+</body>
+</html>
