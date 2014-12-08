@@ -63,26 +63,28 @@ routees.paths = [
         static void Container()
         {
             var config = ConfigurationFactory.ParseString(@"
-            routees.paths = [
-                ""akka://MySystem/user/Worker1"" #testing full path
-                ]");
+routees.paths = [
+    ""akka://MySystem/user/Worker1"" #testing full path
+    user/Worker2
+    user/Worker3
+    user/Worker4
+]");
 
             IWindsorContainer container = new WindsorContainer();
             container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
-            //container.Register(Component.For<ActorSystem>());
 
-            ApplicationConfig appConfig = new ApplicationConfig(container,config);
+            WindsorConfiguration appConfig = new WindsorConfiguration(container);
             var system = appConfig.actorSystem("Test");
-
-            ///system.ActorOf(Props.Create(() => container.Resolve<TypedWorker>()),)
-            ///
+            
             system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker1");
-     
+            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker2");
+            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker3");
+            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker4");
             
 
             var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
-            Task.Delay(500).Wait();
+            Task.Delay(2000).Wait();
 
             for (var i = 0; i < 5; i++)
             {
