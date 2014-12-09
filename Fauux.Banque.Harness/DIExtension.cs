@@ -11,14 +11,27 @@ using Autofac;
 
 namespace Fauux.Banque.Harness
 {
-    public class NijectConfiuration : IContainerConfiguration
+    public class NinjectConfiuration : IContainerConfiguration
     {
-        public NijectConfiuration(Ninject.IKernel container)
+        public NinjectConfiuration(Ninject.IKernel container)
         {
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
         }
         Ninject.IKernel container;
+
+        public ActorSystem actorSystem(string SystemName)
+        {
+            if (SystemName == null) throw new ArgumentNullException("SystemName");
+            var system = ActorSystem.Create(SystemName);
+            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
+
+
+
+            DIExtension.DIExtensionProvider.Get(system).Initialize(this);
+            return system;
+        }    
+
         public Type GetType(string ActorName)
         {
             return
@@ -55,9 +68,9 @@ namespace Fauux.Banque.Harness
                 container.
                 ComponentRegistry.
                 Registrations.
-                Where(registration => registration.Target.GetType().
+                Where(registration => registration.Activator.LimitType.
                     Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
-                    Select(regisration => regisration.Target.GetType()).
+                    Select(regisration => regisration.Activator.LimitType).
                     FirstOrDefault();
             
         }
