@@ -15,9 +15,9 @@ namespace Fauux.Banque.Harness
     {
         static void Main(string[] args)
         {
-            //HardCoded();
-            //ContainerWindsor();
-            //ContainerAutoFac();
+            HardCoded();
+            ContainerWindsor();
+            ContainerAutoFac();
             ContainerNinject();
         }
         static void HardCoded()
@@ -76,14 +76,13 @@ routees.paths = [
             container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
 
             WindsorConfiguration appConfig = new WindsorConfiguration(container);
-            var system = appConfig.actorSystem("Test");
-            
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker1");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker2");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker3");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker4");
-            
+            var system = appConfig.CreateActorSystem("Test");
 
+            system.ActorOf<TypedWorker>("Worker1");
+            system.ActorOf<TypedWorker>("Worker2");
+            system.ActorOf<TypedWorker>("Worker3");
+            system.ActorOf<TypedWorker>("Worker4");
+            
             var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
             Task.Delay(2000).Wait();
@@ -116,17 +115,15 @@ routees.paths = [
 ]");
 
             Ninject.IKernel container = new Ninject.StandardKernel();
-            container.Bind<TypedWorker>();
-           
+            container.Bind<TypedWorker>().To(typeof(TypedWorker));
 
             NinjectConfiuration appConfig = new NinjectConfiuration(container);
-            var system = appConfig.actorSystem("Test");
+            var system = appConfig.CreateActorSystem("Test");
 
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker1");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker2");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker3");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker4");
-
+            system.ActorOf<TypedWorker>("Worker1");
+            system.ActorOf<TypedWorker>("Worker2");
+            system.ActorOf<TypedWorker>("Worker3");
+            system.ActorOf<TypedWorker>("Worker4");
 
             var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
@@ -166,14 +163,13 @@ routees.paths = [
 
             
             AutoFacConfiguration appConfig = new AutoFacConfiguration(container);
-            var system = appConfig.actorSystem("Test");
-            
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker1");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker2");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker3");
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props("TypedWorker"), "Worker4");
-            
+            var system = appConfig.CreateActorSystem("Test");
 
+            system.ActorOf<TypedWorker>("Worker1");
+            system.ActorOf<TypedWorker>("Worker2");
+            system.ActorOf<TypedWorker>("Worker3");
+            system.ActorOf<TypedWorker>("Worker4");
+            
             var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
             Task.Delay(2000).Wait();

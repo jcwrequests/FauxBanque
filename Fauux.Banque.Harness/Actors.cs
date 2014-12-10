@@ -33,7 +33,7 @@ public class TypedWorker : TypedActor, IHandle<TypedActorMessage>, IHandle<Anoth
     public TypedWorker()
     {
        //
-        Console.Write("jdlsf");
+        Console.WriteLine("Created {0}",Guid.NewGuid().ToString());
     }
 
     public void Handle(TypedActorMessage message)

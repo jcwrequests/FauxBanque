@@ -8,25 +8,52 @@ using Castle.Windsor;
 using Autofac.Builder;
 using Autofac.Core;
 using Autofac;
+using System.Collections.Concurrent;
 
 namespace Fauux.Banque.Harness
 {
+    public static class ActorSystemExtensions
+    {
+        public static void ActorOf<TActor>(this ActorSystem system, string Name) where TActor : ActorBase
+        {
+            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props(typeof(TActor).Name), Name);
+        }
+    }
+    public static class StringExtensions
+    {
+        public static Type GetTypeValue(this string typeName)
+        {
+            var firstTry = Type.GetType(typeName);
+            Func<Type> searchForType = () =>
+                {
+                    return
+                    AppDomain.
+                        CurrentDomain.
+                        GetAssemblies().
+                        SelectMany(x => x.GetTypes()).
+                        Where(t => t.Name.Equals(typeName)).
+                        FirstOrDefault();
+                };
+            return firstTry ?? searchForType();
+        }
+    }
     public class NinjectConfiuration : IContainerConfiguration
     {
+        Ninject.IKernel container;
+        private ConcurrentDictionary<string, Type> typeCache;
+
         public NinjectConfiuration(Ninject.IKernel container)
         {
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
+            typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         }
-        Ninject.IKernel container;
-
-        public ActorSystem actorSystem(string SystemName)
+        
+        public ActorSystem CreateActorSystem(string SystemName)
         {
             if (SystemName == null) throw new ArgumentNullException("SystemName");
             var system = ActorSystem.Create(SystemName);
             system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
-
-
 
             DIExtension.DIExtensionProvider.Get(system).Initialize(this);
             return system;
@@ -34,14 +61,10 @@ namespace Fauux.Banque.Harness
 
         public Type GetType(string ActorName)
         {
-            return
-            this.
-                container.
-                GetBindings(typeof(object))
-                .Where(binding => binding.Target.GetType().
-                    Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
-                    Select(binding => binding.Target.GetType()).
-                    FirstOrDefault();
+            if (!typeCache.ContainsKey(ActorName))
+                typeCache.TryAdd(ActorName, ActorName.GetTypeValue());
+
+            return typeCache[ActorName];
         }
 
         public Func<ActorBase> CreateActor(string ActorName)
@@ -49,6 +72,7 @@ namespace Fauux.Banque.Harness
             return () =>
             {
                 Type actorType = this.GetType(ActorName);
+                
                 return (ActorBase)container.GetService(actorType);
             };
             
@@ -57,24 +81,31 @@ namespace Fauux.Banque.Harness
     public class AutoFacConfiguration : IContainerConfiguration
     {
         private IContainer container;
+        private ConcurrentDictionary<string, Type> typeCache;
 
         public AutoFacConfiguration(IContainer container)
         {
             this.container = container;
+            typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         }
+
         public Type GetType(string ActorName)
         {
-            return 
+            if (!typeCache.ContainsKey(ActorName))
+                typeCache.TryAdd(ActorName, 
+                ActorName.GetTypeValue() ??
                 container.
                 ComponentRegistry.
                 Registrations.
                 Where(registration => registration.Activator.LimitType.
                     Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
                     Select(regisration => regisration.Activator.LimitType).
-                    FirstOrDefault();
+                    FirstOrDefault());
+
+            return typeCache[ActorName];
             
         }
-        public ActorSystem actorSystem(string SystemName)
+        public ActorSystem CreateActorSystem(string SystemName)
         {
             var system = ActorSystem.Create(SystemName);
             system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
@@ -94,14 +125,16 @@ namespace Fauux.Banque.Harness
     public class WindsorConfiguration : IContainerConfiguration
     {
         private IWindsorContainer container;
+        private ConcurrentDictionary<string, Type> typeCache;
 
         public WindsorConfiguration(IWindsorContainer container)
         {
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
+            typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public ActorSystem actorSystem(string SystemName)
+        public ActorSystem CreateActorSystem(string SystemName)
         {
             if (SystemName == null) throw new ArgumentNullException("SystemName");
             var system = ActorSystem.Create(SystemName);
@@ -115,18 +148,22 @@ namespace Fauux.Banque.Harness
 
         public Type GetType(string ActorName)
         {
-            return 
-                container.
-                Kernel.
-                GetAssignableHandlers(typeof(object)).
-                Where(handler => handler.ComponentModel.Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
-                Select(handler => handler.ComponentModel.Implementation).
-                FirstOrDefault();
+            if (!typeCache.ContainsKey(ActorName))
+   
+                typeCache.TryAdd(ActorName, 
+                                 ActorName.GetTypeValue() ??
+                                 container.
+                                 Kernel.
+                                 GetAssignableHandlers(typeof(object)).
+                                 Where(handler => handler.ComponentModel.Name.Equals(ActorName, StringComparison.InvariantCultureIgnoreCase)).
+                                 Select(handler => handler.ComponentModel.Implementation).
+                                 FirstOrDefault());
+
+            return typeCache[ActorName];
         }
 
         public Func<ActorBase> CreateActor(string ActorName)
         {
-           
             return () => (ActorBase)container.Resolve(GetType(ActorName));
         }
 
@@ -139,6 +176,7 @@ namespace Fauux.Banque.Harness
     {
         Type GetType(string ActorName);
         Func<ActorBase> CreateActor(string ActorName);
+        ActorSystem CreateActorSystem(string SystemName);
     }
 
     public class DIExt : IExtension
