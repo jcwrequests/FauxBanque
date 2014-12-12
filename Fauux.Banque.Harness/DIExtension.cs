@@ -14,10 +14,14 @@ namespace Fauux.Banque.Harness
 {
     public static class ActorSystemExtensions
     {
-        public static void ActorOf<TActor>(this ActorSystem system, string Name) where TActor : ActorBase
+        public static void AddDependencyResolver(this ActorSystem system, IDependencyResolver ext)
         {
-            system.ActorOf(DIExtension.DIExtensionProvider.Get(system).Props(typeof(TActor).Name), Name);
+            if (system == null) throw new ArgumentNullException("system");
+            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
+            DIExtension.DIExtensionProvider.Get(system).Initialize(ext);
         }
+
+        
     }
     public static class StringExtensions
     {
@@ -37,27 +41,19 @@ namespace Fauux.Banque.Harness
             return firstTry ?? searchForType();
         }
     }
-    public class NinjectConfiuration : IContainerConfiguration
+    public class NinjectDependencyResolver : IDependencyResolver
     {
         Ninject.IKernel container;
         private ConcurrentDictionary<string, Type> typeCache;
 
-        public NinjectConfiuration(Ninject.IKernel container)
+        public NinjectDependencyResolver(Ninject.IKernel container)
         {
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         }
         
-        public ActorSystem CreateActorSystem(string SystemName)
-        {
-            if (SystemName == null) throw new ArgumentNullException("SystemName");
-            var system = ActorSystem.Create(SystemName);
-            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
-
-            DIExtension.DIExtensionProvider.Get(system).Initialize(this);
-            return system;
-        }    
+       
 
         public Type GetType(string ActorName)
         {
@@ -67,7 +63,7 @@ namespace Fauux.Banque.Harness
             return typeCache[ActorName];
         }
 
-        public Func<ActorBase> CreateActor(string ActorName)
+        public Func<ActorBase> CreateActorFactory(string ActorName)
         {
             return () =>
             {
@@ -78,12 +74,12 @@ namespace Fauux.Banque.Harness
             
         }
     }
-    public class AutoFacConfiguration : IContainerConfiguration
+    public class AutoFacDependencyResolver : IDependencyResolver
     {
         private IContainer container;
         private ConcurrentDictionary<string, Type> typeCache;
 
-        public AutoFacConfiguration(IContainer container)
+        public AutoFacDependencyResolver(IContainer container)
         {
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
@@ -105,15 +101,8 @@ namespace Fauux.Banque.Harness
             return typeCache[ActorName];
             
         }
-        public ActorSystem CreateActorSystem(string SystemName)
-        {
-            var system = ActorSystem.Create(SystemName);
-            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
 
-            DIExtension.DIExtensionProvider.Get(system).Initialize(this);
-            return system;
-        }           
-        public Func<ActorBase> CreateActor(string ActorName)
+        public Func<ActorBase> CreateActorFactory(string ActorName)
         {
             return () =>
             {
@@ -122,29 +111,19 @@ namespace Fauux.Banque.Harness
             };
         }
     }
-    public class WindsorConfiguration : IContainerConfiguration
+    public class WindsorDependencyResolver : IDependencyResolver
     {
         private IWindsorContainer container;
         private ConcurrentDictionary<string, Type> typeCache;
 
-        public WindsorConfiguration(IWindsorContainer container)
+        public WindsorDependencyResolver(IWindsorContainer container)
         {
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
         }
 
-        public ActorSystem CreateActorSystem(string SystemName)
-        {
-            if (SystemName == null) throw new ArgumentNullException("SystemName");
-            var system = ActorSystem.Create(SystemName);
-            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
-        
-
-
-            DIExtension.DIExtensionProvider.Get(system).Initialize(this);
-            return system;
-        }                                                                                                
+                                                                                             
 
         public Type GetType(string ActorName)
         {
@@ -162,7 +141,7 @@ namespace Fauux.Banque.Harness
             return typeCache[ActorName];
         }
 
-        public Func<ActorBase> CreateActor(string ActorName)
+        public Func<ActorBase> CreateActorFactory(string ActorName)
         {
             return () => (ActorBase)container.Resolve(GetType(ActorName));
         }
@@ -172,24 +151,23 @@ namespace Fauux.Banque.Harness
     }
 
 
-    public interface IContainerConfiguration
+    public interface IDependencyResolver
     {
         Type GetType(string ActorName);
-        Func<ActorBase> CreateActor(string ActorName);
-        ActorSystem CreateActorSystem(string SystemName);
+        Func<ActorBase> CreateActorFactory(string ActorName);
     }
 
     public class DIExt : IExtension
     {
-        private IContainerConfiguration applicationContext;
+        private IDependencyResolver dependencyResolver;
 
-        public void Initialize(IContainerConfiguration applicationContext)
+        public void Initialize(IDependencyResolver dependencyResolver)
         {
-            this.applicationContext = applicationContext;
+            this.dependencyResolver = dependencyResolver;
         }
         public Props Props(String actorName)
         {
-            return new Props(typeof(DIActorProducerClass),  new object[] { applicationContext, actorName });
+            return new Props(typeof(DIActorProducerClass),  new object[] { dependencyResolver, actorName });
         }
 
     }
@@ -207,20 +185,20 @@ namespace Fauux.Banque.Harness
 
     public class DIActorProducerClass : IndirectActorProducer
     {
-        private IContainerConfiguration applicationContext;
+        private IDependencyResolver dependencyResolver;
         private string actorName;
         readonly Func<ActorBase> myActor;
 
-        public DIActorProducerClass(IContainerConfiguration applicationContext,
+        public DIActorProducerClass(IDependencyResolver dependencyResolver,
                                     string actorName)
         {
-            this.applicationContext = applicationContext;
+            this.dependencyResolver = dependencyResolver;
             this.actorName = actorName;
-            this.myActor = applicationContext.CreateActor(actorName);
+            this.myActor = dependencyResolver.CreateActorFactory(actorName);
         }
         public Type ActorType
         {
-            get { return this.applicationContext.GetType(this.actorName); }
+            get { return this.dependencyResolver.GetType(this.actorName); }
         }
 
         public ActorBase Produce()

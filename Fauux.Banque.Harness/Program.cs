@@ -71,37 +71,40 @@ routees.paths = [
     user/Worker3
     user/Worker4
 ]");
-
-            IWindsorContainer container = new WindsorContainer();
-            container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
-
-            WindsorConfiguration appConfig = new WindsorConfiguration(container);
-            var system = appConfig.CreateActorSystem("Test");
-
-            system.ActorOf<TypedWorker>("Worker1");
-            system.ActorOf<TypedWorker>("Worker2");
-            system.ActorOf<TypedWorker>("Worker3");
-            system.ActorOf<TypedWorker>("Worker4");
-            
-            var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
-
-            Task.Delay(2000).Wait();
-
-            for (var i = 0; i < 5; i++)
+            using (var system = ActorSystem.Create("MySystem"))
             {
-                for (var j = 0; j < 7; j++)
+                IWindsorContainer container = new WindsorContainer();
+                container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
+
+                WindsorDependencyResolver appConfig = new WindsorDependencyResolver(container);
+                system.AddDependencyResolver(appConfig);
+
+                system.ActorOf<TypedWorker>("Worker1");
+                system.ActorOf<TypedWorker>("Worker2");
+                system.ActorOf<TypedWorker>("Worker3");
+                system.ActorOf<TypedWorker>("Worker4");
+
+                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+
+                Task.Delay(2000).Wait();
+
+                for (var i = 0; i < 5; i++)
                 {
+                    for (var j = 0; j < 7; j++)
+                    {
 
-                    TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
-                    AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
+                        TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
+                        AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
 
-                    var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
+                        var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                    hashGroup.Tell(msg);
-                    hashGroup.Tell(envelope);
+                        hashGroup.Tell(msg);
+                        hashGroup.Tell(envelope);
 
+                    }
                 }
             }
+            
             Console.ReadLine();
         }
         static void ContainerNinject()
@@ -117,33 +120,38 @@ routees.paths = [
             Ninject.IKernel container = new Ninject.StandardKernel();
             container.Bind<TypedWorker>().To(typeof(TypedWorker));
 
-            NinjectConfiuration appConfig = new NinjectConfiuration(container);
-            var system = appConfig.CreateActorSystem("Test");
-
-            system.ActorOf<TypedWorker>("Worker1");
-            system.ActorOf<TypedWorker>("Worker2");
-            system.ActorOf<TypedWorker>("Worker3");
-            system.ActorOf<TypedWorker>("Worker4");
-
-            var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
-
-            Task.Delay(2000).Wait();
-
-            for (var i = 0; i < 5; i++)
+            NinjectDependencyResolver appConfig = new NinjectDependencyResolver(container);
+            using (var system = ActorSystem.Create("MySystem"))
             {
-                for (var j = 0; j < 7; j++)
+                system.AddDependencyResolver(appConfig);
+
+                system.ActorOf<TypedWorker>("Worker1");
+                system.ActorOf<TypedWorker>("Worker2");
+                system.ActorOf<TypedWorker>("Worker3");
+                system.ActorOf<TypedWorker>("Worker4");
+
+                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+
+                Task.Delay(2000).Wait();
+
+                for (var i = 0; i < 5; i++)
                 {
+                    for (var j = 0; j < 7; j++)
+                    {
 
-                    TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
-                    AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
+                        TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
+                        AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
 
-                    var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
+                        var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                    hashGroup.Tell(msg);
-                    hashGroup.Tell(envelope);
+                        hashGroup.Tell(msg);
+                        hashGroup.Tell(envelope);
 
+                    }
                 }
             }
+
+            
             Console.ReadLine();
         }
         static void ContainerAutoFac()
@@ -161,34 +169,37 @@ routees.paths = [
             Autofac.IContainer container = builder.Build();
 
 
-            
-            AutoFacConfiguration appConfig = new AutoFacConfiguration(container);
-            var system = appConfig.CreateActorSystem("Test");
-
-            system.ActorOf<TypedWorker>("Worker1");
-            system.ActorOf<TypedWorker>("Worker2");
-            system.ActorOf<TypedWorker>("Worker3");
-            system.ActorOf<TypedWorker>("Worker4");
-            
-            var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
-
-            Task.Delay(2000).Wait();
-
-            for (var i = 0; i < 5; i++)
+            using (var system = ActorSystem.Create("MySystem"))
             {
-                for (var j = 0; j < 7; j++)
+                AutoFacDependencyResolver appConfig = new AutoFacDependencyResolver(container);
+                system.AddDependencyResolver(appConfig);
+
+                system.ActorOf<TypedWorker>("Worker1");
+                system.ActorOf<TypedWorker>("Worker2");
+                system.ActorOf<TypedWorker>("Worker3");
+                system.ActorOf<TypedWorker>("Worker4");
+
+                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+
+                Task.Delay(2000).Wait();
+
+                for (var i = 0; i < 5; i++)
                 {
+                    for (var j = 0; j < 7; j++)
+                    {
 
-                    TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
-                    AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
+                        TypedActorMessage msg = new TypedActorMessage { Id = j, Name = Guid.NewGuid().ToString() };
+                        AnotherMessage ms = new AnotherMessage { Id = j, Name = msg.Name };
 
-                    var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
+                        var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                    hashGroup.Tell(msg);
-                    hashGroup.Tell(envelope);
+                        hashGroup.Tell(msg);
+                        hashGroup.Tell(envelope);
 
+                    }
                 }
             }
+            
             Console.ReadLine();
         }
     }
