@@ -14,11 +14,22 @@ namespace Fauux.Banque.Harness
 {
     public static class ActorSystemExtensions
     {
+        public static Props Props<TActor>(this ActorSystem system) where TActor : ActorBase
+        {
+            return system.GetExtension<DIExt>().Props(typeof(TActor).Name);
+        }
+        public static void ActorOf<TActor>(this ActorSystem system, string Name) where TActor : ActorBase
+        {
+            system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), Name);
+        }
+
         public static void AddDependencyResolver(this ActorSystem system, IDependencyResolver ext)
         {
             if (system == null) throw new ArgumentNullException("system");
-            system.RegisterExtension((IExtensionId)DIExtension.DIExtensionProvider);
-            DIExtension.DIExtensionProvider.Get(system).Initialize(ext);
+            var provider = DIExtension.DIExtensionProvider;
+
+            system.RegisterExtension((IExtensionId)provider);
+            provider.Get(system).Initialize(ext);
         }
 
         
@@ -45,12 +56,15 @@ namespace Fauux.Banque.Harness
     {
         Ninject.IKernel container;
         private ConcurrentDictionary<string, Type> typeCache;
-
-        public NinjectDependencyResolver(Ninject.IKernel container)
+        private ActorSystem system;
+        public NinjectDependencyResolver(Ninject.IKernel container,ActorSystem system)
         {
+            if (system == null) throw new ArgumentNullException("system");
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+            this.system = system;
+            this.system.AddDependencyResolver(this);
         }
         
        
@@ -73,16 +87,26 @@ namespace Fauux.Banque.Harness
             };
             
         }
-    }
+    
+        public void Create<TActor>(string name) where TActor : ActorBase
+        {
+ 	        system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+        }
+}
     public class AutoFacDependencyResolver : IDependencyResolver
     {
         private IContainer container;
         private ConcurrentDictionary<string, Type> typeCache;
+        private ActorSystem system;
 
-        public AutoFacDependencyResolver(IContainer container)
+        public AutoFacDependencyResolver(IContainer container, ActorSystem system)
         {
+            if (system == null) throw new ArgumentNullException("system");
+            if (container == null) throw new ArgumentNullException("container");
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+            this.system = system;
+            this.system.AddDependencyResolver(this);
         }
 
         public Type GetType(string ActorName)
@@ -110,17 +134,26 @@ namespace Fauux.Banque.Harness
                 return (ActorBase)container.Resolve(actorType);
             };
         }
+
+        public void Create<TActor>(string name) where TActor : ActorBase
+        {
+            system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+        }
     }
     public class WindsorDependencyResolver : IDependencyResolver
     {
         private IWindsorContainer container;
         private ConcurrentDictionary<string, Type> typeCache;
+        private ActorSystem system;
 
-        public WindsorDependencyResolver(IWindsorContainer container)
+        public WindsorDependencyResolver(IWindsorContainer container, ActorSystem system)
         {
+            if (system == null) throw new ArgumentNullException("system");
             if (container == null) throw new ArgumentNullException("container");
             this.container = container;
             typeCache = new ConcurrentDictionary<string, Type>(StringComparer.InvariantCultureIgnoreCase);
+            this.system = system;
+            this.system.AddDependencyResolver(this);
         }
 
                                                                                              
@@ -146,6 +179,10 @@ namespace Fauux.Banque.Harness
             return () => (ActorBase)container.Resolve(GetType(ActorName));
         }
 
+        public void Create<TActor>(string name) where TActor : ActorBase
+        {
+            system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+        }
 
          
     }
@@ -155,10 +192,12 @@ namespace Fauux.Banque.Harness
     {
         Type GetType(string ActorName);
         Func<ActorBase> CreateActorFactory(string ActorName);
+        void Create<TActor>(string name) where TActor : ActorBase;
     }
 
     public class DIExt : IExtension
-    {
+    {       
+
         private IDependencyResolver dependencyResolver;
 
         public void Initialize(IDependencyResolver dependencyResolver)
@@ -203,6 +242,7 @@ namespace Fauux.Banque.Harness
 
         public ActorBase Produce()
         {
+            Console.WriteLine("Produce");
             return myActor();
         }
         

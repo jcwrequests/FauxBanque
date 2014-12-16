@@ -65,29 +65,41 @@ routees.paths = [
         static void ContainerWindsor()
         {
             var config = ConfigurationFactory.ParseString(@"
+
 routees.paths = [
     ""akka://MySystem/user/Worker1"" #testing full path
     user/Worker2
     user/Worker3
     user/Worker4
 ]");
-            using (var system = ActorSystem.Create("MySystem"))
+            using (var system = ActorSystem.Create("MySystem",config))
             {
                 IWindsorContainer container = new WindsorContainer();
                 container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
 
-                WindsorDependencyResolver appConfig = new WindsorDependencyResolver(container);
-                system.AddDependencyResolver(appConfig);
+                WindsorDependencyResolver propsResolver = 
+                    new WindsorDependencyResolver(container,system);
 
-                system.ActorOf<TypedWorker>("Worker1");
-                system.ActorOf<TypedWorker>("Worker2");
-                system.ActorOf<TypedWorker>("Worker3");
-                system.ActorOf<TypedWorker>("Worker4");
+                propsResolver.Create<TypedWorker>("Worker1");
+                propsResolver.Create<TypedWorker>("Worker2");
+                propsResolver.Create<TypedWorker>("Worker3");
+                propsResolver.Create<TypedWorker>("Worker4");
+
+
+                //system.ActorOf(system.Props<TypedWorker>(), "Worker1");
+                //system.ActorOf(system.Props<TypedWorker>(), "Worker2");
+                //system.ActorOf(system.Props<TypedWorker>(), "Worker3");
+                //system.ActorOf(system.Props<TypedWorker>(), "Worker4");
+
+                //system.ActorOf<TypedWorker>("Worker1");
+                //system.ActorOf<TypedWorker>("Worker2");
+                //system.ActorOf<TypedWorker>("Worker3");
+                //system.ActorOf<TypedWorker>("Worker4");
 
                 var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
-                Task.Delay(2000).Wait();
-
+                Task.Delay(500).Wait();
+                Console.WriteLine("Sending Messages");
                 for (var i = 0; i < 5; i++)
                 {
                     for (var j = 0; j < 7; j++)
@@ -120,19 +132,26 @@ routees.paths = [
             Ninject.IKernel container = new Ninject.StandardKernel();
             container.Bind<TypedWorker>().To(typeof(TypedWorker));
 
-            NinjectDependencyResolver appConfig = new NinjectDependencyResolver(container);
+            
             using (var system = ActorSystem.Create("MySystem"))
             {
-                system.AddDependencyResolver(appConfig);
+                NinjectDependencyResolver propsResolver = 
+                    new NinjectDependencyResolver(container,system);
 
-                system.ActorOf<TypedWorker>("Worker1");
-                system.ActorOf<TypedWorker>("Worker2");
-                system.ActorOf<TypedWorker>("Worker3");
-                system.ActorOf<TypedWorker>("Worker4");
+                propsResolver.Create<TypedWorker>("Worker1");
+                propsResolver.Create<TypedWorker>("Worker2");
+                propsResolver.Create<TypedWorker>("Worker3");
+                propsResolver.Create<TypedWorker>("Worker4");
+
+                //system.ActorOf<TypedWorker>("Worker1");
+                //system.ActorOf<TypedWorker>("Worker2");
+                //system.ActorOf<TypedWorker>("Worker3");
+                //system.ActorOf<TypedWorker>("Worker4");
 
                 var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
-                Task.Delay(2000).Wait();
+                Task.Delay(500).Wait();
+                Console.WriteLine("Sending Messages");
 
                 for (var i = 0; i < 5; i++)
                 {
@@ -171,17 +190,24 @@ routees.paths = [
 
             using (var system = ActorSystem.Create("MySystem"))
             {
-                AutoFacDependencyResolver appConfig = new AutoFacDependencyResolver(container);
-                system.AddDependencyResolver(appConfig);
+                AutoFacDependencyResolver propsResolver = 
+                    new AutoFacDependencyResolver(container, system);
 
-                system.ActorOf<TypedWorker>("Worker1");
-                system.ActorOf<TypedWorker>("Worker2");
-                system.ActorOf<TypedWorker>("Worker3");
-                system.ActorOf<TypedWorker>("Worker4");
+
+                propsResolver.Create<TypedWorker>("Worker1");
+                propsResolver.Create<TypedWorker>("Worker2");
+                propsResolver.Create<TypedWorker>("Worker3");
+                propsResolver.Create<TypedWorker>("Worker4");
+
+                //system.ActorOf<TypedWorker>("Worker1");
+                //system.ActorOf<TypedWorker>("Worker2");
+                //system.ActorOf<TypedWorker>("Worker3");
+                //system.ActorOf<TypedWorker>("Worker4");
 
                 var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
 
-                Task.Delay(2000).Wait();
+                Task.Delay(500).Wait();
+                Console.WriteLine("Sending Messages");
 
                 for (var i = 0; i < 5; i++)
                 {
