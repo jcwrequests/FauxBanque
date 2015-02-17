@@ -87,10 +87,10 @@ namespace Fauux.Banque.Harness
             };
             
         }
-    
-        public void Create<TActor>(string name) where TActor : ActorBase
+
+        public Props Create<TActor>() where TActor : ActorBase
         {
- 	        system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+            return system.GetExtension<DIExt>().Props(typeof(TActor).Name);
         }
 }
     public class AutoFacDependencyResolver : IDependencyResolver
@@ -135,9 +135,9 @@ namespace Fauux.Banque.Harness
             };
         }
 
-        public void Create<TActor>(string name) where TActor : ActorBase
+        public Props Create<TActor>() where TActor : ActorBase
         {
-            system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+            return system.GetExtension<DIExt>().Props(typeof(TActor).Name);
         }
     }
     public class WindsorDependencyResolver : IDependencyResolver
@@ -179,9 +179,9 @@ namespace Fauux.Banque.Harness
             return () => (ActorBase)container.Resolve(GetType(ActorName));
         }
 
-        public void Create<TActor>(string name) where TActor : ActorBase
+        public Props Create<TActor>() where TActor : ActorBase
         {
-            system.ActorOf(system.GetExtension<DIExt>().Props(typeof(TActor).Name), name);
+            return system.GetExtension<DIExt>().Props(typeof(TActor).Name);
         }
 
          
@@ -192,7 +192,7 @@ namespace Fauux.Banque.Harness
     {
         Type GetType(string ActorName);
         Func<ActorBase> CreateActorFactory(string ActorName);
-        void Create<TActor>(string name) where TActor : ActorBase;
+        Props Create<TActor>() where TActor : ActorBase;
     }
 
     public class DIExt : IExtension
@@ -247,4 +247,23 @@ namespace Fauux.Banque.Harness
         }
         
     }
+    public class test : IDependencyResolver
+    {
+        Type IDependencyResolver.GetType(string ActorName)
+        {
+            throw new NotImplementedException();
+        }
+
+        Func<ActorBase> IDependencyResolver.CreateActorFactory(string ActorName)
+        {
+            throw new NotImplementedException();
+        }
+
+        Props IDependencyResolver.Create<TActor>()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+
 }

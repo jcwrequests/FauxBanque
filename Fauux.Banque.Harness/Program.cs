@@ -15,10 +15,10 @@ namespace Fauux.Banque.Harness
     {
         static void Main(string[] args)
         {
-            HardCoded();
+            //HardCoded();
             ContainerWindsor();
-            ContainerAutoFac();
-            ContainerNinject();
+            //ContainerAutoFac();
+            //ContainerNinject();
         }
         static void HardCoded()
         {
@@ -77,13 +77,14 @@ routees.paths = [
                 IWindsorContainer container = new WindsorContainer();
                 container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
 
+                
                 WindsorDependencyResolver propsResolver = 
                     new WindsorDependencyResolver(container,system);
 
-                propsResolver.Create<TypedWorker>("Worker1");
-                propsResolver.Create<TypedWorker>("Worker2");
-                propsResolver.Create<TypedWorker>("Worker3");
-                propsResolver.Create<TypedWorker>("Worker4");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
 
 
                 //system.ActorOf(system.Props<TypedWorker>(), "Worker1");
@@ -138,10 +139,10 @@ routees.paths = [
                 NinjectDependencyResolver propsResolver = 
                     new NinjectDependencyResolver(container,system);
 
-                propsResolver.Create<TypedWorker>("Worker1");
-                propsResolver.Create<TypedWorker>("Worker2");
-                propsResolver.Create<TypedWorker>("Worker3");
-                propsResolver.Create<TypedWorker>("Worker4");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
 
                 //system.ActorOf<TypedWorker>("Worker1");
                 //system.ActorOf<TypedWorker>("Worker2");
@@ -194,10 +195,10 @@ routees.paths = [
                     new AutoFacDependencyResolver(container, system);
 
 
-                propsResolver.Create<TypedWorker>("Worker1");
-                propsResolver.Create<TypedWorker>("Worker2");
-                propsResolver.Create<TypedWorker>("Worker3");
-                propsResolver.Create<TypedWorker>("Worker4");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
+                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
 
                 //system.ActorOf<TypedWorker>("Worker1");
                 //system.ActorOf<TypedWorker>("Worker2");
