@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Faux.Banque.Domain.Interfaces
 {
@@ -20,10 +21,9 @@ namespace Faux.Banque.Domain.Interfaces
      public interface IAppendOnlyStore : IDisposable
      {
          void Append(string streamName, byte[] data, long expectedStreamVersion = -1);
-         IEnumerable<DataWithVersion> ReadRecords(string streamName, long afterVersion, int maxCount);
-         IEnumerable<DataWithName> ReadRecords(DateTimeOffset afterVersion, int maxCount);
-         DateTimeOffset GetCurrentVersion();
-         void Close();
+         Task<IEnumerable<DataWithVersion>> ReadRecords(string streamName, long afterVersion, int maxCount);
+         Task<IEnumerable<DataWithName>> ReadRecords(DateTimeOffset afterVersion, int maxCount);
+         Task<DateTimeOffset> GetCurrentVersion();
      }
 
      public sealed class DataWithVersion

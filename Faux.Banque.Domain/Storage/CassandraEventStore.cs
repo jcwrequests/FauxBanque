@@ -38,11 +38,11 @@ namespace Faux.Banque.Domain.Storage
     {
 
         private IMapper mapper;
-
-        public CassandraEventStore(IMapper mapper)
+        private ISession session;
+        public CassandraEventStore(ISession session)
         {
-            if (mapper == null) throw new ArgumentNullException("mapper");
-            this.mapper = mapper;
+            if (session == null) throw new ArgumentNullException("session");
+            this.mapper = new Mapper(session);
 
             MappingConfiguration.
                 Global.
@@ -75,35 +75,20 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()));
 
-
-
-
         }
         public void Initialize()
         {
-            //using (var cluster = Cluster.Builder().AddContactPoint(connectionString).Build())
-            //using (var session = cluster.Connect())
-            //    {
-            //    Dictionary<string,string> options = new Dictionary<string,string>();
-            //    options.Add("class","SimpleStrategy");
-            //    options.Add("replication_factor","3");
+            Dictionary<string,string> options = new Dictionary<string,string>();
+            options.Add("class","SimpleStrategy");
+            options.Add("replication_factor","3");
 
-            //        session.CreateKeyspaceIfNotExists("EventStore", options);
-            //        var table = session.GetTable<EventStoreRecord>("Events", "EventStore");
-            //        table.CreateIfNotExists();
-
-            //        //session.Execute("CREATE KEYSPACE IF NOT EXISTS EventStore WITH replication = {'class':'SimpleStrategy', 'replication_factor':3};");
-            //        //session.Execute("CREATE TABLE EventStore.Events (" +
-            //        //                        "id uuid," +
-            //        //                        "name varchar" +
-            //        //                        "version int," +
-            //        //                        "version_time_stamp timestamp," +
-            //        //                        "data blob," +
-            //        //                        "PRIMARY KEY(id, name)" +
-            //        //                        ");");
-
-            //    }
-
+            session.CreateKeyspaceIfNotExists("EventStore", options);
+            Table<Record> record = new Table<Record>(session);
+            record.CreateIfNotExists();
+            Table<RecordToBeProcesed> recordTBP = new Table<RecordToBeProcesed>(session);
+            recordTBP.CreateIfNotExists();
+            Table<EventStoreVersion> version = new Table<EventStoreVersion>(session);
+            version.CreateIfNotExists();
         }
         public async void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
         {
@@ -153,14 +138,11 @@ namespace Faux.Banque.Domain.Storage
         }
 
 
-        public void Close()
-        {
-            throw new NotImplementedException();
-        }
-
         public void Dispose()
         {
-            throw new NotImplementedException();
+            session.Dispose();
+            mapper = null;
+            session = null;
         }
 
 
