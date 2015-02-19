@@ -43,6 +43,7 @@ namespace Faux.Banque.Domain.Storage
         {
             if (session == null) throw new ArgumentNullException("session");
             this.mapper = new Mapper(session);
+            this.session = session;
 
             MappingConfiguration.
                 Global.
