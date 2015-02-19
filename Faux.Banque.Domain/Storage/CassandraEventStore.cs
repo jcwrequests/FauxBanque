@@ -49,9 +49,8 @@ namespace Faux.Banque.Domain.Storage
                 Global.
                 Define(
                        new Map<Record>()
-                          .TableName("Events").
-                          PartitionKey("name", "version_time_stamp", "version").
-                          ClusteringKey("version_time_stamp").
+                          .TableName("Events").PartitionKey(e => e.Name, e=> e.VersionTimeStamp, e=> e.Version).
+                          ClusteringKey(k => k.VersionTimeStamp).
                           KeyspaceName("EventStore").
                           Column(r => r.Id, cm => cm.WithName("id").WithDbType<Guid>()).
                           Column(r => r.Name, cm => cm.WithName("name").WithDbType<string>()).
