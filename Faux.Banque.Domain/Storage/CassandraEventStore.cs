@@ -49,18 +49,21 @@ namespace Faux.Banque.Domain.Storage
                 Global.
                 Define(
                        new Map<Record>()
-                          .TableName("Events").PartitionKey(e => e.Name, e=> e.VersionTimeStamp, e=> e.Version).
-                          ClusteringKey(k => k.VersionTimeStamp).
+                          .TableName("Events").
                           KeyspaceName("EventStore").
                           Column(r => r.Id, cm => cm.WithName("id").WithDbType<Guid>()).
                           Column(r => r.Name, cm => cm.WithName("name").WithDbType<string>()).
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Version, cm => cm.WithName("version").WithDbType<long>()).
-                          Column(r => r.Data, cm => cm.WithName("data").WithDbType<byte[]>()),
+                          Column(r => r.Data, cm => cm.WithName("data").WithDbType<byte[]>()).
+                          PartitionKey(e => e.Name, e=> e.VersionTimeStamp, e=> e.Version).
+                          ClusteringKey(Tuple.Create("version_time_stamp",SortOrder.Ascending)),
                        new Map<RecordToBeProcesed>()
                           .TableName("Events").
                           PartitionKey("processed", "version_time_stamp", "name", "version").
-                          ClusteringKey("version_time_stamp ASC", "name DESC", "version ASC").
+                          ClusteringKey(Tuple.Create("version_time_stamp", SortOrder.Ascending), 
+                                        Tuple.Create("name",SortOrder.Descending),
+                                        Tuple.Create("version", SortOrder.Ascending)).
                           KeyspaceName("EventStore").
                           Column(r => r.Id, cm => cm.WithName("id").WithDbType<Guid>()).
                           Column(r => r.Name, cm => cm.WithName("name").WithDbType<string>()).
@@ -83,6 +86,8 @@ namespace Faux.Banque.Domain.Storage
             options.Add("replication_factor","3");
 
             session.CreateKeyspaceIfNotExists("EventStore", options);
+            session.ChangeKeyspace("EventStore");
+
             Table<Record> record = new Table<Record>(session);
             record.CreateIfNotExists();
             Table<RecordToBeProcesed> recordTBP = new Table<RecordToBeProcesed>(session);
@@ -92,6 +97,7 @@ namespace Faux.Banque.Domain.Storage
         }
         public async void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
         {
+            if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
             var currentVersion = await mapper.
                 FirstOrDefaultAsync<int>(string.Format("SELECT version FROM Events WHERE name = '{0}';",streamName));
@@ -148,6 +154,8 @@ namespace Faux.Banque.Domain.Storage
 
         public async Task<IEnumerable<DataWithVersion>> ReadRecords(string streamName, long afterVersion, int maxCount)
         {
+            if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
+
             var results = await mapper.
                 FetchAsync<Record>(string.Format("SELECT * FROM Events WHERE name = '{0}' LIMIT {1};",
                 streamName, maxCount));
@@ -158,6 +166,8 @@ namespace Faux.Banque.Domain.Storage
 
         public async Task<IEnumerable<DataWithName>> ReadRecords(DateTimeOffset afterVersion, int maxCount)
         {
+            if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
+
             var result = await mapper.
                 FetchAsync<Record>(string.Format("SELECT * FROM Events WHERE date_time_offset > {0} LIMIT {1} ALLOW FILTERING;",
                 afterVersion, maxCount));
@@ -169,6 +179,8 @@ namespace Faux.Banque.Domain.Storage
 
         public async Task<DateTimeOffset> GetCurrentVersion()
         {
+            if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
+
             var version = await mapper.
                 FirstOrDefaultAsync<EventStoreVersion>("SELECT * FROM EventsVersionsToBeProcessed LIMIT 1;");
 
