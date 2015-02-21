@@ -56,11 +56,13 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Version, cm => cm.WithName("version").WithDbType<long>()).
                           Column(r => r.Data, cm => cm.WithName("data").WithDbType<byte[]>()).
-                          PartitionKey(e => e.Name, e=> e.VersionTimeStamp, e=> e.Version).
-                          ClusteringKey(Tuple.Create("version_time_stamp",SortOrder.Ascending)),
+                          PartitionKey(e => e.Name).
+                          ClusteringKey(Tuple.Create("version_time_stamp",SortOrder.Ascending),
+                                        Tuple.Create("version", SortOrder.Unspecified)),
                        new Map<RecordToBeProcesed>()
                           .TableName("Events").
-                          PartitionKey("processed", "version_time_stamp", "name", "version").
+                          KeyspaceName("EventStore").
+                          PartitionKey("processed").
                           ClusteringKey(Tuple.Create("version_time_stamp", SortOrder.Ascending), 
                                         Tuple.Create("name",SortOrder.Descending),
                                         Tuple.Create("version", SortOrder.Ascending)).
@@ -73,7 +75,9 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()),
                        new Map<EventStoreVersion>().
                           TableName("EventsVersionsToBeProcessed").
-                          PartitionKey("version_time_stamp","processed").
+                          KeyspaceName("EventStore").
+                          PartitionKey("version_time_stamp").
+                          ClusteringKey("processed").
                           KeyspaceName("EventStore").
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()));
