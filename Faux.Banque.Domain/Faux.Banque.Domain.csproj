@@ -68,11 +68,20 @@
     <Compile Include="Aggregates\CustomerState.cs" />
     <Compile Include="Contracts\CustomerContracts.cs" />
     <Compile Include="Contracts\LedgerTransaction.cs" />
+    <None Include="CQL\GetVersionForGivenKey.cql" />
+    <None Include="CQL\ReadRecordsByKey.cql" />
+    <None Include="CQL\Version.cql" />
+    <None Include="CQL\ReadRecordsByDataStamp.cql" />
     <Compile Include="Exceptions\AppendOnlyStoreConcurrencyException.cs" />
     <Compile Include="Exceptions\OptimisticConcurrencyException.cs" />
     <Compile Include="Exceptions\RealConcurrencyException.cs" />
     <Compile Include="Interfaces\Interfaces.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Storage\CassandraEventStore.cs" />
     <Compile Include="Storage\EventStore.cs" />
     <Compile Include="Storage\EventStream.cs" />
@@ -88,7 +97,12 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

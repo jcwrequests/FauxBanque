@@ -8,6 +8,8 @@ using Cassandra;
 using Faux.Banque.Domain.Exceptions;
 using Cassandra.Data.Linq;
 using Cassandra.Mapping;
+using CQL = Faux.Banque.Domain.Properties.Resources;
+using System.Globalization;
 
 namespace Faux.Banque.Domain.Storage
 {
@@ -104,7 +106,7 @@ namespace Faux.Banque.Domain.Storage
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
             var currentVersion = await mapper.
-                FirstOrDefaultAsync<int>(string.Format("SELECT version FROM Events WHERE name = '{0}';",streamName));
+                FirstOrDefaultAsync<int>(string.Format(CQL.GetVersionForGivenKey, streamName));
             
             if (expectedStreamVersion >= 0)
             {
@@ -161,7 +163,7 @@ namespace Faux.Banque.Domain.Storage
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
             var results = await mapper.
-                FetchAsync<Record>(string.Format("SELECT * FROM Events WHERE name = '{0}' LIMIT {1};",
+                FetchAsync<Record>(string.Format(CQL.ReadRecordsByKey,
                 streamName, maxCount));
 
             return results.Select(r => new DataWithVersion(r.Version, r.Data));
@@ -173,8 +175,8 @@ namespace Faux.Banque.Domain.Storage
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
             var result = await mapper.
-                FetchAsync<Record>(string.Format("SELECT * FROM Events WHERE date_time_offset > {0} LIMIT {1} ALLOW FILTERING;",
-                afterVersion, maxCount));
+                FetchAsync<Record>(string.Format(CQL.ReadRecordsByDataStamp,
+                Encode(afterVersion), maxCount));
 
             return result.Select(r => new DataWithName(r.Name, r.Data));
 
@@ -186,11 +188,21 @@ namespace Faux.Banque.Domain.Storage
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
             var version = await mapper.
-                FirstOrDefaultAsync<EventStoreVersion>("SELECT * FROM EventsVersionsToBeProcessed LIMIT 1;");
+                FirstOrDefaultAsync<EventStoreVersion>(CQL.Version);
 
             if (version == null) return DateTimeOffset.Now;
 
             return version.VersionTimeStamp;
+        }
+
+        internal static readonly DateTimeOffset UnixStart = new DateTimeOffset(1970, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+
+        private static string Encode(DateTimeOffset val)
+        {
+            if (val == DateTimeOffset.MinValue)
+                return 0.ToString(CultureInfo.InvariantCulture);
+            else
+                return Convert.ToInt64(Math.Floor((val - UnixStart).TotalMilliseconds)).ToString(CultureInfo.InvariantCulture);
         }
     }
 }
