@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Cassandra.Data.Linq;
 using Cassandra.Mapping;
 using Cassandra;
+using CQL = Faux.Banque.Domain.Properties.Resources;
+
 
 namespace Faux.Banque.Domain.Storage
 {
@@ -15,6 +17,9 @@ namespace Faux.Banque.Domain.Storage
        private ICluster cluster;
        private readonly string keySpace;
 
+       /// <summary>
+       /// Initializing the Mapping for the environment
+       /// </summary>
        static CassandraEnvironment()
        {
            MappingConfiguration.
@@ -54,19 +59,26 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()));
        }
-       public CassandraEnvironment(ICluster cluster, string keySpace) 
+       public CassandraEnvironment(ICluster cluster) 
        {
+           this.keySpace = "EventStore";
            if (cluster == null) throw new ArgumentNullException("cluster");
            if (keySpace == null) throw new ArgumentNullException("keySpace");
 
            this.cluster = cluster;
-           this.keySpace = keySpace;
+           
        }
-
+       /// <summary>
+       /// Create a session for the given keyspace
+       /// </summary>
+       /// <returns></returns>
        public  ISession CreateSession()
        {           
            return cluster.Connect(keySpace);
        }
+       /// <summary>
+       /// Initializes a Cassandra Cluster with a new Cassandra EventStore
+       /// </summary>
        public void Initialize()
        {
             using (ISession session = cluster.Connect(keySpace))
@@ -87,9 +99,15 @@ namespace Faux.Banque.Domain.Storage
             }
             
        }
-       public void Rebuild()
+       /// <summary>
+       /// Truncates all the data in the EventStore
+       /// </summary>
+       public void Truncate()
        {
-
+           using (ISession session = cluster.Connect(keySpace))
+           {
+               session.Execute(CQL.Truncate);
+           }
        }
        public void Drop()
        {

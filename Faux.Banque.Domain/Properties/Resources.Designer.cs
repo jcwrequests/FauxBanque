@@ -74,7 +74,7 @@ namespace Faux.Banque.Domain.Properties {
         /// <summary>
         ///   Looks up a localized string similar to SELECT * 
         ///FROM    &quot;EventStore&quot;.&quot;Events&quot;
-        ///WHERE date_time_offset &gt; {0} LIMIT {1} ALLOW FILTERING;.
+        ///WHERE version_time_stamp  &gt; {0} LIMIT {1} ALLOW FILTERING;.
         /// </summary>
         internal static string ReadRecordsByDataStamp {
             get {
@@ -90,6 +90,17 @@ namespace Faux.Banque.Domain.Properties {
         internal static string ReadRecordsByKey {
             get {
                 return ResourceManager.GetString("ReadRecordsByKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TRUNCATE TABLE &quot;EventStore&quot;.&quot;Events&quot;;
+        ///TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsToBeProcessed&quot;;
+        ///TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsVersionsToBeProcessed&quot;.
+        /// </summary>
+        internal static string Truncate {
+            get {
+                return ResourceManager.GetString("Truncate", resourceCulture);
             }
         }
         

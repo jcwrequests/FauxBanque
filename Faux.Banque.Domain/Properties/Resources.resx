@@ -127,6 +127,9 @@
   <data name="ReadRecordsByKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CQL\ReadRecordsByKey.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="Truncate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\Truncate.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="Version" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CQL\Version.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

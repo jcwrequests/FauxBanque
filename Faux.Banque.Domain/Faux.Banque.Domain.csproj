@@ -70,6 +70,7 @@
     <Compile Include="Contracts\LedgerTransaction.cs" />
     <None Include="CQL\GetVersionForGivenKey.cql" />
     <None Include="CQL\ReadRecordsByKey.cql" />
+    <None Include="CQL\Truncate.cql" />
     <None Include="CQL\Version.cql" />
     <None Include="CQL\ReadRecordsByDataStamp.cql" />
     <Compile Include="Exceptions\AppendOnlyStoreConcurrencyException.cs" />
