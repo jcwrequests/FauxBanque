@@ -8,17 +8,32 @@ namespace Faux.Banque.Domain.Tests
     [TestClass]
     public class CassandraEventStoreTests
     {
+        ICluster cluster;
+        CassandraEnvironment environment;
+
+        [TestInitialize]
+        public void SetUp()
+        {
+            cluster = Cluster.Builder()
+                .AddContactPoints("localhost")
+                    .Build();
+
+            environment = new CassandraEnvironment(cluster,"EventStore");
+            
+            
+        }
+        [TestCleanup]
+        public void CleanUp()
+        {
+            cluster.Dispose();
+        }
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void CREATE_SESSION()
         {
-            var cluster = Cluster.Builder()
-                .AddContactPoints("localhost")
-                    .Build();
-            
-            ISession session = cluster.Connect("EventStore");
+
+            ISession session = environment.CreateSession();
             Assert.IsNotNull(session);
-            cluster.Dispose();
             session.Dispose();
 
         }
@@ -27,45 +42,29 @@ namespace Faux.Banque.Domain.Tests
         [TestMethod]
         public void CREATE_STORE()
         {
-            var cluster = Cluster.Builder()
-                .AddContactPoints("localhost")
-                    .Build();
-
-            ISession session = cluster.Connect("EventStore");
+            ISession session = environment.CreateSession();
 
             IAppendOnlyStore cassandraES = new CassandraEventStore(session);
 
             Assert.IsNotNull(cassandraES);
 
-            cluster.Dispose();
             session.Dispose();
         }
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void INITIALIZE_STORE()
         {
-            var cluster = Cluster.Builder()
-                .AddContactPoints("localhost")
-                    .Build();
-
-            ISession session = cluster.Connect("EventStore");
-
+            ISession session = environment.CreateSession();
+            
             CassandraEventStore cassandraES = new CassandraEventStore(session);
-
-            cassandraES.Initialize();
-
-            cluster.Dispose();
+            environment.Initialize();
             session.Dispose();
         }
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void GET_CURRENT_VERSION()
         {
-            var cluster = Cluster.Builder()
-                .AddContactPoints("localhost")
-                    .Build();
-
-            ISession session = cluster.Connect("EventStore");
+            ISession session = environment.CreateSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -81,19 +80,13 @@ namespace Faux.Banque.Domain.Tests
                 GetExcepton(e);
             }
             
-
-            cluster.Dispose();
             session.Dispose();
         }
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void READ_RECORDS_FROM_GIVEN_POINT_IN_TIME_MOVING_FORWARD()
         {
-            var cluster = Cluster.Builder()
-                 .AddContactPoints("localhost")
-                     .Build();
-
-            ISession session = cluster.Connect("EventStore");
+            ISession session = environment.CreateSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -109,19 +102,13 @@ namespace Faux.Banque.Domain.Tests
                 GetExcepton(e);
             }
 
-
-            cluster.Dispose();
             session.Dispose();
         }
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void READ_ALL_RECORDS_FOR_GIVEN_KEY()
         {
-            var cluster = Cluster.Builder()
-                 .AddContactPoints("localhost")
-                     .Build();
-
-            ISession session = cluster.Connect("EventStore");
+            ISession session = environment.CreateSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -137,8 +124,6 @@ namespace Faux.Banque.Domain.Tests
                 GetExcepton(e);
             }
 
-
-            cluster.Dispose();
             session.Dispose();
         }
         private static string GetExcepton(Exception ex)

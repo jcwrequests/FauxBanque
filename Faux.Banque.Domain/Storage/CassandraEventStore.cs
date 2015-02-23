@@ -46,26 +46,8 @@ namespace Faux.Banque.Domain.Storage
             if (session == null) throw new ArgumentNullException("session");
             this.mapper = new Mapper(session);
             this.session = session;
-
-            
-
         }
-        public void Initialize()
-        {
-            Dictionary<string,string> options = new Dictionary<string,string>();
-            options.Add("class","SimpleStrategy");
-            options.Add("replication_factor","3");
-
-            session.CreateKeyspaceIfNotExists("EventStore", options);
-            session.ChangeKeyspace("EventStore");
-
-            Table<Record> record = new Table<Record>(session);
-            record.CreateIfNotExists();
-            Table<RecordToBeProcesed> recordTBP = new Table<RecordToBeProcesed>(session);
-            recordTBP.CreateIfNotExists();
-            Table<EventStoreVersion> version = new Table<EventStoreVersion>(session);
-            version.CreateIfNotExists();
-        }
+        
         public async void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
         {
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
@@ -121,7 +103,6 @@ namespace Faux.Banque.Domain.Storage
             mapper = null;
             session = null;
         }
-
 
         public async Task<IEnumerable<DataWithVersion>> ReadRecords(string streamName, long afterVersion, int maxCount)
         {

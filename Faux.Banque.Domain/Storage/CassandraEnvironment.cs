@@ -13,7 +13,8 @@ namespace Faux.Banque.Domain.Storage
     {
       
        private ICluster cluster;
-       
+       private readonly string keySpace;
+
        static CassandraEnvironment()
        {
            MappingConfiguration.
@@ -53,16 +54,46 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.VersionTimeStamp, cm => cm.WithName("version_time_stamp").WithDbType<DateTimeOffset>()).
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()));
        }
-       public CassandraEnvironment(ICluster cluster) 
+       public CassandraEnvironment(ICluster cluster, string keySpace) 
        {
            if (cluster == null) throw new ArgumentNullException("cluster");
+           if (keySpace == null) throw new ArgumentNullException("keySpace");
+
            this.cluster = cluster;
+           this.keySpace = keySpace;
        }
 
-       public  ISession CreateSession(string keySpace)
-       {
-           if (keySpace == null) throw new ArgumentNullException("keySpace");
+       public  ISession CreateSession()
+       {           
            return cluster.Connect(keySpace);
+       }
+       public void Initialize()
+       {
+            using (ISession session = cluster.Connect(keySpace))
+            {
+                Dictionary<string,string> options = new Dictionary<string,string>();
+                options.Add("class","SimpleStrategy");
+                options.Add("replication_factor","3");
+
+                session.CreateKeyspaceIfNotExists("EventStore", options);
+                session.ChangeKeyspace("EventStore");
+
+                Table<Record> record = new Table<Record>(session);
+                record.CreateIfNotExists();
+                Table<RecordToBeProcesed> recordTBP = new Table<RecordToBeProcesed>(session);
+                recordTBP.CreateIfNotExists();
+                Table<EventStoreVersion> version = new Table<EventStoreVersion>(session);
+                version.CreateIfNotExists();
+            }
+            
+       }
+       public void Rebuild()
+       {
+
+       }
+       public void Drop()
+       {
+
        }
        
     }
