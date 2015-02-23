@@ -82,6 +82,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Storage\CassandraEnvironment.cs" />
     <Compile Include="Storage\CassandraEventStore.cs" />
     <Compile Include="Storage\EventStore.cs" />
     <Compile Include="Storage\EventStream.cs" />
