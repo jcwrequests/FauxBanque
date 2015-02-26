@@ -11,7 +11,7 @@ using CQL = Faux.Banque.Domain.Properties.Resources;
 
 namespace Faux.Banque.Domain.Storage
 {
-   public class CassandraEnvironment
+   public class CassandraEnvironment : ICassandraSetUp, ICassandraEnvironment
     {
       
        private ICluster cluster;
@@ -72,30 +72,25 @@ namespace Faux.Banque.Domain.Storage
        /// Create a session for the given keyspace
        /// </summary>
        /// <returns></returns>
-       public  ISession CreateSession()
+       public  ISession CreateEventStoreSession()
        {           
            return cluster.Connect(keySpace);
+       }
+       public ISession CreateServerSession()
+       {
+           return cluster.Connect();
        }
        /// <summary>
        /// Initializes a Cassandra Cluster with a new Cassandra EventStore
        /// </summary>
        public void Initialize()
        {
-            using (ISession session = cluster.Connect(keySpace))
+            using (ISession session = cluster.Connect())
             {
-                Dictionary<string,string> options = new Dictionary<string,string>();
-                options.Add("class","SimpleStrategy");
-                options.Add("replication_factor","3");
-
-                session.CreateKeyspaceIfNotExists("EventStore", options);
-                session.ChangeKeyspace("EventStore");
-
-                Table<Record> record = new Table<Record>(session);
-                record.CreateIfNotExists();
-                Table<RecordToBeProcesed> recordTBP = new Table<RecordToBeProcesed>(session);
-                recordTBP.CreateIfNotExists();
-                Table<EventStoreVersion> version = new Table<EventStoreVersion>(session);
-                version.CreateIfNotExists();
+                session.Execute(CQL.CreateKeyspace);
+                session.Execute(CQL.CreateEventsTable);
+                session.Execute(CQL.CreateEventsToBeProcessedTable);
+                session.Execute(CQL.CreateEventsVersionsToBeProcessedTable);
             }
             
        }
@@ -106,12 +101,20 @@ namespace Faux.Banque.Domain.Storage
        {
            using (ISession session = cluster.Connect(keySpace))
            {
-               session.Execute(CQL.Truncate);
+               session.Execute(CQL.TruncateEvents);
+               session.Execute(CQL.TruncateEventsToBeProcessed);
+               session.Execute(CQL.TruncateEventsVersionsToBeProcessed);
            }
        }
+       /// <summary>
+       /// Drops the Keyspace
+       /// </summary>
        public void Drop()
        {
-
+           using (ISession session = cluster.Connect())
+           {
+               session.Execute(CQL.Drop);
+           }
        }
        
     }

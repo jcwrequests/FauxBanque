@@ -118,6 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="CreateEventsTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\CreateEventsTable.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="CreateEventsToBeProcessedTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\CreateEventsToBeProcessedTable.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="CreateEventsVersionsToBeProcessedTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\CreateEventsVersionsToBeProcessedTable.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="CreateKeyspace" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\CreateKeyspace.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="Drop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\Drop.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="GetVersionForGivenKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CQL\GetVersionForGivenKey.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
@@ -127,8 +142,14 @@
   <data name="ReadRecordsByKey" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CQL\ReadRecordsByKey.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="Truncate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\CQL\Truncate.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="TruncateEvents" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\TruncateEvents.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="TruncateEventsToBeProcessed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\TruncateEventsToBeProcessed.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="TruncateEventsVersionsToBeProcessed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\CQL\TruncateEventsVersionsToBeProcessed.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="Version" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\CQL\Version.cql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

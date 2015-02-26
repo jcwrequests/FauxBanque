@@ -18,9 +18,7 @@ namespace Faux.Banque.Domain.Tests
                 .AddContactPoints("localhost")
                     .Build();
 
-            environment = new CassandraEnvironment(cluster,"EventStore");
-            
-            
+            environment = new CassandraEnvironment(cluster);     
         }
         [TestCleanup]
         public void CleanUp()
@@ -32,7 +30,7 @@ namespace Faux.Banque.Domain.Tests
         public void CREATE_SESSION()
         {
 
-            ISession session = environment.CreateSession();
+            ISession session = environment.CreateEventStoreSession();
             Assert.IsNotNull(session);
             session.Dispose();
 
@@ -42,7 +40,7 @@ namespace Faux.Banque.Domain.Tests
         [TestMethod]
         public void CREATE_STORE()
         {
-            ISession session = environment.CreateSession();
+            ISession session = environment.CreateEventStoreSession();
 
             IAppendOnlyStore cassandraES = new CassandraEventStore(session);
 
@@ -50,21 +48,12 @@ namespace Faux.Banque.Domain.Tests
 
             session.Dispose();
         }
-        [TestCategory("CASSANDRA_EVENT_STORE")]
-        [TestMethod]
-        public void INITIALIZE_STORE()
-        {
-            ISession session = environment.CreateSession();
-            
-            CassandraEventStore cassandraES = new CassandraEventStore(session);
-            environment.Initialize();
-            session.Dispose();
-        }
+       
         [TestCategory("CASSANDRA_EVENT_STORE")]
         [TestMethod]
         public void GET_CURRENT_VERSION()
         {
-            ISession session = environment.CreateSession();
+            ISession session = environment.CreateEventStoreSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -86,7 +75,7 @@ namespace Faux.Banque.Domain.Tests
         [TestMethod]
         public void READ_RECORDS_FROM_GIVEN_POINT_IN_TIME_MOVING_FORWARD()
         {
-            ISession session = environment.CreateSession();
+            ISession session = environment.CreateEventStoreSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -108,7 +97,7 @@ namespace Faux.Banque.Domain.Tests
         [TestMethod]
         public void READ_ALL_RECORDS_FOR_GIVEN_KEY()
         {
-            ISession session = environment.CreateSession();
+            ISession session = environment.CreateEventStoreSession();
 
             CassandraEventStore cassandraES = new CassandraEventStore(session);
 
@@ -131,5 +120,7 @@ namespace Faux.Banque.Domain.Tests
             if (ex.InnerException == null) throw ex;
             return GetExcepton(ex.InnerException);
         }
+
+        
     }
 }

@@ -61,6 +61,74 @@ namespace Faux.Banque.Domain.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS
+        /// &quot;EventStore&quot;.&quot;Events&quot; (
+        ///id uuid,
+        ///name varchar,
+        ///version int,
+        ///version_time_stamp timestamp,
+        ///data blob,
+        ///PRIMARY KEY(name,version_time_stamp, version ))
+        ///WITH CLUSTERING ORDER BY (version_time_stamp ASC);.
+        /// </summary>
+        internal static string CreateEventsTable {
+            get {
+                return ResourceManager.GetString("CreateEventsTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS
+        ///&quot;EventStore&quot;.&quot;EventsToBeProcessed&quot; (
+        ///id uuid,
+        ///name varchar,
+        ///version int,
+        ///version_time_stamp timestamp,
+        ///data blob,
+        ///processed boolean,
+        ///PRIMARY KEY(processed,version_time_stamp,name,version ))
+        ///WITH CLUSTERING ORDER BY (version_time_stamp ASC, name DESC, version ASC);.
+        /// </summary>
+        internal static string CreateEventsToBeProcessedTable {
+            get {
+                return ResourceManager.GetString("CreateEventsToBeProcessedTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE TABLE IF NOT EXISTS
+        ///&quot;EventStore&quot;.&quot;EventsVersionsToBeProcessed&quot;(
+        ///version_time_stamp timestamp,
+        ///processed boolean,
+        ///PRIMARY KEY(version_time_stamp , processed));.
+        /// </summary>
+        internal static string CreateEventsVersionsToBeProcessedTable {
+            get {
+                return ResourceManager.GetString("CreateEventsVersionsToBeProcessedTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CREATE KEYSPACE IF NOT EXISTS 
+        ///&quot;EventStore&quot; WITH replication = 
+        ///{&apos;class&apos;:&apos;SimpleStrategy&apos;, &apos;replication_factor&apos;:3};.
+        /// </summary>
+        internal static string CreateKeyspace {
+            get {
+                return ResourceManager.GetString("CreateKeyspace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DROP KEYSPACE &quot;EventStore&quot;;.
+        /// </summary>
+        internal static string Drop {
+            get {
+                return ResourceManager.GetString("Drop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT	version 
         ///FROM	&quot;EventStore&quot;.&quot;Events&quot;
         ///WHERE name = &apos;{0}&apos;;.
@@ -94,13 +162,29 @@ namespace Faux.Banque.Domain.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TRUNCATE TABLE &quot;EventStore&quot;.&quot;Events&quot;;
-        ///TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsToBeProcessed&quot;;
-        ///TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsVersionsToBeProcessed&quot;.
+        ///   Looks up a localized string similar to TRUNCATE TABLE &quot;EventStore&quot;.&quot;Events&quot;;.
         /// </summary>
-        internal static string Truncate {
+        internal static string TruncateEvents {
             get {
-                return ResourceManager.GetString("Truncate", resourceCulture);
+                return ResourceManager.GetString("TruncateEvents", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsToBeProcessed&quot;;.
+        /// </summary>
+        internal static string TruncateEventsToBeProcessed {
+            get {
+                return ResourceManager.GetString("TruncateEventsToBeProcessed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TRUNCATE TABLE &quot;EventStore&quot;.&quot;EventsVersionsToBeProcessed&quot;.
+        /// </summary>
+        internal static string TruncateEventsVersionsToBeProcessed {
+            get {
+                return ResourceManager.GetString("TruncateEventsVersionsToBeProcessed", resourceCulture);
             }
         }
         

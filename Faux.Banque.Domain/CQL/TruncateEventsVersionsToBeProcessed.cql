@@ -1,0 +1,1 @@
+﻿TRUNCATE "EventStore"."EventsVersionsToBeProcessed"
