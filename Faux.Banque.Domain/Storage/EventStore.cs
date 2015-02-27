@@ -8,12 +8,15 @@ using System.Threading.Tasks;
 
 namespace Faux.Banque.Domain.Storage
 {
-    public class EventStore : IEventStore, Faux.Banque.Domain.Storage.IEventStoreSerializer
+    
+    
+    public class EventStore : IEventStore, IEventStoreSerializer
     {
         private IAppendOnlyStore appendOnlyStore;
         private IEventStoreSerializer serializer;
+        public event NewEventsArrivedHandler NewEventsArrived;
+        public delegate void NewEventsArrivedHandler(int count);
 
-       
         public EventStore(IAppendOnlyStore appendOnlyStore, IEventStoreSerializer serializer)
         {
             if (appendOnlyStore == null) throw new ArgumentNullException("appendOnlyStore");
@@ -29,10 +32,10 @@ namespace Faux.Banque.Domain.Storage
             readTask.Wait();
             EventStream stream = new EventStream();
 
-            foreach (var tapeRecord in readTask.Result)
+            foreach (var record in readTask.Result)
             {
-                stream.Events.AddRange(serializer.DeserializeEvent(tapeRecord.Data));
-                stream.Version = tapeRecord.Version;
+                stream.Events.AddRange(serializer.DeserializeEvent(record.Data));
+                stream.Version = record.Version;
             }
             return stream;
                 
@@ -56,7 +59,22 @@ namespace Faux.Banque.Domain.Storage
                 throw OptimisticConcurrencyException.Create(stream.Version, expectedVersion, id.ToString(), stream.Events);
             }
         }
-        public event NewEventsArrivedHandler NewEventsArrived;
-        public delegate void NewEventsArrivedHandler(int count);
+
+        
+
+
+        public IList<IEvent> LoadEvents(DateTimeOffset afterVersion, int maxCount)
+        {
+            var readTask = this.appendOnlyStore.ReadRecords(afterVersion, maxCount);
+            readTask.Wait();
+
+            var events = new List<IEvent>();
+
+            foreach (var record in readTask.Result)
+            {
+                events.AddRange(serializer.DeserializeEvent(record.Data));
+            }
+            return events;
+        }
     }
 }

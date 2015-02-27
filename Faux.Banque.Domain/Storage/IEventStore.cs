@@ -10,5 +10,7 @@ namespace Faux.Banque.Domain.Storage
     {
         EventStream LoadEventStream(IIdentity id);
         void AppendToStream(IIdentity id, long expectedVersion, ICollection<IEvent> events);
+        IList<IEvent> LoadEvents(DateTimeOffset afterVersion, int maxCount);
+        event EventStore.NewEventsArrivedHandler NewEventsArrived;
     }
 }
