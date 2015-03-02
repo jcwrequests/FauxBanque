@@ -10,7 +10,7 @@ namespace Faux.Banque.Domain.Storage
 {
     
     
-    public class EventStore : IEventStore, IEventStoreSerializer
+    public class EventStore : IEventStore
     {
         private IAppendOnlyStore appendOnlyStore;
         private IEventStoreSerializer serializer;

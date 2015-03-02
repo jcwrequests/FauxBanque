@@ -1,0 +1,9 @@
+akka.actor.deployment {
+            /router1 {
+                router = consistent-hashing-pool
+                    resizer {
+                        enabled = on
+                        lower-bound = 2
+                        upper-bound = 3
+                    }
+                }

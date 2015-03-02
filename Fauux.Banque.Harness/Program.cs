@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Castle.Windsor;
 using Castle.MicroKernel.Registration;
 using Autofac;
+using My = Fauux.Banque.Harness.Properties.Resources;
+
 namespace Fauux.Banque.Harness
 {
     class Program
@@ -22,24 +24,18 @@ namespace Fauux.Banque.Harness
         }
         static void HardCoded()
         {
-            var config = ConfigurationFactory.ParseString(@"
-routees.paths = [
-    ""akka://MySystem/user/Worker1"" #testing full path
-    user/Worker2
-    user/Worker3
-    user/Worker4
-]");
+
+            var config = ConfigurationFactory.ParseString(My.HashPool);
 
             using (var system = ActorSystem.Create("MySystem"))
             {
 
+                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                messagesPerResize: 1, backoffThreshold: 0.0d);
+                var pool = new ConsistentHashingPool(config);
+                pool.Resizer = resizer;
 
-                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker1");
-                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker2");
-                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker3");
-                system.ActorOf(Props.Create(() => new TypedWorker()), "Worker4");
-
-                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+                var router = system.ActorOf(Props.Create<TypedWorker>().WithRouter(pool));
 
                 Task.Delay(500).Wait();
 
@@ -53,8 +49,9 @@ routees.paths = [
 
                         var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                        hashGroup.Tell(msg);
-                        hashGroup.Tell(envelope);
+                        router.Tell(msg);
+                        router.Tell(envelope);
+                       
 
                     }
                 }
@@ -64,40 +61,22 @@ routees.paths = [
         }
         static void ContainerWindsor()
         {
-            var config = ConfigurationFactory.ParseString(@"
+            var config = ConfigurationFactory.ParseString(My.HashPool);
 
-routees.paths = [
-    ""akka://MySystem/user/Worker1"" #testing full path
-    user/Worker2
-    user/Worker3
-    user/Worker4
-]");
             using (var system = ActorSystem.Create("MySystem",config))
             {
                 IWindsorContainer container = new WindsorContainer();
                 container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
 
-                
+                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                messagesPerResize: 1, backoffThreshold: 0.0d);
+                var pool = new ConsistentHashingPool(config);
+                pool.Resizer = resizer;
+
                 WindsorDependencyResolver propsResolver = 
                     new WindsorDependencyResolver(container,system);
 
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
-
-
-                //system.ActorOf(system.Props<TypedWorker>(), "Worker1");
-                //system.ActorOf(system.Props<TypedWorker>(), "Worker2");
-                //system.ActorOf(system.Props<TypedWorker>(), "Worker3");
-                //system.ActorOf(system.Props<TypedWorker>(), "Worker4");
-
-                //system.ActorOf<TypedWorker>("Worker1");
-                //system.ActorOf<TypedWorker>("Worker2");
-                //system.ActorOf<TypedWorker>("Worker3");
-                //system.ActorOf<TypedWorker>("Worker4");
-
-                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+                var router = system.ActorOf(propsResolver.Create<TypedWorker>().WithRouter(pool));
 
                 Task.Delay(500).Wait();
                 Console.WriteLine("Sending Messages");
@@ -111,8 +90,8 @@ routees.paths = [
 
                         var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                        hashGroup.Tell(msg);
-                        hashGroup.Tell(envelope);
+                        router.Tell(msg);
+                        router.Tell(envelope);
 
                     }
                 }
@@ -122,13 +101,7 @@ routees.paths = [
         }
         static void ContainerNinject()
         {
-            var config = ConfigurationFactory.ParseString(@"
-routees.paths = [
-    ""akka://MySystem/user/Worker1"" #testing full path
-    user/Worker2
-    user/Worker3
-    user/Worker4
-]");
+            var config = ConfigurationFactory.ParseString(My.HashPool);
 
             Ninject.IKernel container = new Ninject.StandardKernel();
             container.Bind<TypedWorker>().To(typeof(TypedWorker));
@@ -139,17 +112,12 @@ routees.paths = [
                 NinjectDependencyResolver propsResolver = 
                     new NinjectDependencyResolver(container,system);
 
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
+                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                messagesPerResize: 1, backoffThreshold: 0.0d);
+                var pool = new ConsistentHashingPool(config);
+                pool.Resizer = resizer;
 
-                //system.ActorOf<TypedWorker>("Worker1");
-                //system.ActorOf<TypedWorker>("Worker2");
-                //system.ActorOf<TypedWorker>("Worker3");
-                //system.ActorOf<TypedWorker>("Worker4");
-
-                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+                var router = system.ActorOf(propsResolver.Create<TypedWorker>().WithRouter(pool));
 
                 Task.Delay(500).Wait();
                 Console.WriteLine("Sending Messages");
@@ -164,8 +132,8 @@ routees.paths = [
 
                         var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                        hashGroup.Tell(msg);
-                        hashGroup.Tell(envelope);
+                        router.Tell(msg);
+                        router.Tell(envelope);
 
                     }
                 }
@@ -176,13 +144,7 @@ routees.paths = [
         }
         static void ContainerAutoFac()
         {
-            var config = ConfigurationFactory.ParseString(@"
-routees.paths = [
-    ""akka://MySystem/user/Worker1"" #testing full path
-    user/Worker2
-    user/Worker3
-    user/Worker4
-]");
+            var config = ConfigurationFactory.ParseString(My.HashPool);
             var builder = new Autofac.ContainerBuilder();
             builder.RegisterType<TypedWorker>();
 
@@ -193,19 +155,13 @@ routees.paths = [
             {
                 AutoFacDependencyResolver propsResolver = 
                     new AutoFacDependencyResolver(container, system);
+                
+                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                messagesPerResize: 1, backoffThreshold: 0.0d);
+                var pool = new ConsistentHashingPool(config);
+                pool.Resizer = resizer;
 
-
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker1");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker2");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker3");
-                system.ActorOf(propsResolver.Create<TypedWorker>(), "Worker4");
-
-                //system.ActorOf<TypedWorker>("Worker1");
-                //system.ActorOf<TypedWorker>("Worker2");
-                //system.ActorOf<TypedWorker>("Worker3");
-                //system.ActorOf<TypedWorker>("Worker4");
-
-                var hashGroup = system.ActorOf(Props.Empty.WithRouter(new ConsistentHashingGroup(config)));
+                var router = system.ActorOf(propsResolver.Create<TypedWorker>().WithRouter(pool));
 
                 Task.Delay(500).Wait();
                 Console.WriteLine("Sending Messages");
@@ -220,8 +176,8 @@ routees.paths = [
 
                         var envelope = new ConsistentHashableEnvelope(ms, msg.Id);
 
-                        hashGroup.Tell(msg);
-                        hashGroup.Tell(envelope);
+                        router.Tell(msg);
+                        router.Tell(envelope);
 
                     }
                 }
