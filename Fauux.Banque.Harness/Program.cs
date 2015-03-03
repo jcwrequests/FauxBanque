@@ -17,23 +17,23 @@ namespace Fauux.Banque.Harness
     {
         static void Main(string[] args)
         {
-            //HardCoded();
+            HardCoded();
             ContainerWindsor();
-            //ContainerAutoFac();
-            //ContainerNinject();
+            ContainerAutoFac();
+            ContainerNinject();
         }
         static void HardCoded()
         {
 
-            var config = ConfigurationFactory.ParseString(My.HashPool);
+            var config = ConfigurationFactory.ParseString(My.HashPoolWOResizer);
 
             using (var system = ActorSystem.Create("MySystem"))
             {
 
-                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
-                messagesPerResize: 1, backoffThreshold: 0.0d);
+                //var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                //messagesPerResize: 1, backoffThreshold: 0.0d);
                 var pool = new ConsistentHashingPool(config);
-                pool.Resizer = resizer;
+                pool.NrOfInstances = 10;
 
                 var router = system.ActorOf(Props.Create<TypedWorker>().WithRouter(pool));
 
@@ -61,17 +61,18 @@ namespace Fauux.Banque.Harness
         }
         static void ContainerWindsor()
         {
-            var config = ConfigurationFactory.ParseString(My.HashPool);
+            var config = ConfigurationFactory.ParseString(My.HashPoolWOResizer);
 
             using (var system = ActorSystem.Create("MySystem",config))
             {
                 IWindsorContainer container = new WindsorContainer();
                 container.Register(Component.For<TypedWorker>().Named("TypedWorker").LifestyleTransient());
 
-                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
-                messagesPerResize: 1, backoffThreshold: 0.0d);
+                //var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                //messagesPerResize: 1, backoffThreshold: 0.0d);
                 var pool = new ConsistentHashingPool(config);
-                pool.Resizer = resizer;
+                pool.NrOfInstances = 10;
+                //pool.Resizer = resizer;
 
                 WindsorDependencyResolver propsResolver = 
                     new WindsorDependencyResolver(container,system);
@@ -101,7 +102,7 @@ namespace Fauux.Banque.Harness
         }
         static void ContainerNinject()
         {
-            var config = ConfigurationFactory.ParseString(My.HashPool);
+            var config = ConfigurationFactory.ParseString(My.HashPoolWOResizer);
 
             Ninject.IKernel container = new Ninject.StandardKernel();
             container.Bind<TypedWorker>().To(typeof(TypedWorker));
@@ -112,10 +113,11 @@ namespace Fauux.Banque.Harness
                 NinjectDependencyResolver propsResolver = 
                     new NinjectDependencyResolver(container,system);
 
-                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
-                messagesPerResize: 1, backoffThreshold: 0.0d);
+                //var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                //messagesPerResize: 1, backoffThreshold: 0.0d);
                 var pool = new ConsistentHashingPool(config);
-                pool.Resizer = resizer;
+                pool.NrOfInstances = 10;
+                //pool.Resizer = resizer;
 
                 var router = system.ActorOf(propsResolver.Create<TypedWorker>().WithRouter(pool));
 
@@ -144,7 +146,7 @@ namespace Fauux.Banque.Harness
         }
         static void ContainerAutoFac()
         {
-            var config = ConfigurationFactory.ParseString(My.HashPool);
+            var config = ConfigurationFactory.ParseString(My.HashPoolWOResizer);
             var builder = new Autofac.ContainerBuilder();
             builder.RegisterType<TypedWorker>();
 
@@ -156,11 +158,11 @@ namespace Fauux.Banque.Harness
                 AutoFacDependencyResolver propsResolver = 
                     new AutoFacDependencyResolver(container, system);
                 
-                var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
-                messagesPerResize: 1, backoffThreshold: 0.0d);
+                //var resizer = new DefaultResizer(3, 5, pressureThreshold: 1, rampupRate: 0.1d, backoffRate: 0.0d,
+                //messagesPerResize: 1, backoffThreshold: 0.0d);
                 var pool = new ConsistentHashingPool(config);
-                pool.Resizer = resizer;
-
+                //pool.Resizer = resizer;
+                pool.NrOfInstances = 10;
                 var router = system.ActorOf(propsResolver.Create<TypedWorker>().WithRouter(pool));
 
                 Task.Delay(500).Wait();

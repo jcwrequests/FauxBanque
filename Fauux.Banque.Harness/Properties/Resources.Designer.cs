@@ -76,5 +76,17 @@ namespace Fauux.Banque.Harness.Properties {
                 return ResourceManager.GetString("HashPool", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to akka.actor.deployment {
+        ///            /router1 {
+        ///                router = consistent-hashing-poo
+        ///                }.
+        /// </summary>
+        internal static string HashPoolWOResizer {
+            get {
+                return ResourceManager.GetString("HashPoolWOResizer", resourceCulture);
+            }
+        }
     }
 }
