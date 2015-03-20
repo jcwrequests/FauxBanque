@@ -81,6 +81,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="CassandraCustomerActorTests.cs" />
     <Compile Include="Example.cs" />
     <Compile Include="EventStore\InMemoryEventStore.cs" />
     <Compile Include="CustomerTests.cs" />

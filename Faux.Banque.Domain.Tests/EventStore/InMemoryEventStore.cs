@@ -31,5 +31,22 @@ namespace Faux.Banque.Domain.Tests.EventStore
             stream.Version = expectedVersion;
             this.store[id] = stream;
         }
+
+
+        public IList<IEvent> LoadEvents(DateTimeOffset afterVersion, int maxCount)
+        {
+            throw new NotImplementedException();
+        }
+
+        public event Storage.EventStore.NewEventsArrivedHandler NewEventsArrived;
+
+
+
+        IList<IEvent> IEventStore.LoadEvents(DateTimeOffset afterVersion, int maxCount)
+        {
+            throw new NotImplementedException();
+        }
+
+
     }
 }

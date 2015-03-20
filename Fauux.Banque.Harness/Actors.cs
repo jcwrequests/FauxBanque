@@ -46,4 +46,9 @@ public class TypedWorker : TypedActor, IHandle<TypedActorMessage>, IHandle<Anoth
     {
         Console.WriteLine("{0} received other {1}", Self.Path.Name, message);
     }
+
+    protected override void PostStop()
+    {
+        base.PostStop();
+    }
 }

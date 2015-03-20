@@ -1,5 +1,10 @@
 akka.actor.deployment {
             /router1 {
-                router = consistent-hashing-pool
+               router = consistent-hashing-pool
+                        nr-of-instances = 10
+                        cluster {
+                            enabled = on
+                            max-nr-of-instances-per-node = 2
+                        }
 				
                 }

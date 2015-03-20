@@ -93,6 +93,7 @@
     <Compile Include="Storage\CassandraEnvironment.cs" />
     <Compile Include="Storage\CassandraEventStore.cs" />
     <Compile Include="Storage\EventStore.cs" />
+    <Compile Include="Storage\JSONEventStoreSerializer.cs" />
     <Compile Include="Storage\EventStream.cs" />
     <Compile Include="Storage\ICassandraEnvironment.cs" />
     <Compile Include="Storage\ICassandraSetUp.cs" />
