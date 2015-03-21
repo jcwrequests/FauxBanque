@@ -44,7 +44,7 @@ namespace Faux.Banque.Domain.Tests
 
         [TestCategory("Actors")]
         [TestMethod]
-        public void Create_Customer_Using_Receive_Actor()
+        public void Create_Customer_Using_Receive_Actor_With_CES()
         {
             
             var actor = ActorOfAsTestActorRef<CustomerActor>(() => new CustomerActor(store), "cusomters");
@@ -58,7 +58,7 @@ namespace Faux.Banque.Domain.Tests
 
         [TestCategory("Actors")]
         [TestMethod]
-        public void Create_Customer_Using_Typed_Actor()
+        public void Create_Customer_Using_Typed_ActorWith_CES()
         {
             var actor = ActorOfAsTestActorRef<CustomerActorTyped>(() => new CustomerActorTyped(store), "cusomters");
 

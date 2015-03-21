@@ -90,6 +90,7 @@
     <Compile Include="RouterTests.cs" />
     <Compile Include="CassandraEventStoreTests.cs" />
     <Compile Include="CassandraSetupTests.cs" />
+    <Compile Include="SerializationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Faux.Banque.Domain\Faux.Banque.Domain.csproj">
