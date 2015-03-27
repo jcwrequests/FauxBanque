@@ -48,12 +48,12 @@ namespace Faux.Banque.Domain.Storage
             this.session = session;
         }
         
-        public async void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
+        public void Append(string streamName, byte[] data, long expectedStreamVersion = -1)
         {
             if (session.Keyspace != "EventStore") session.ChangeKeyspace("EventStore");
 
-            var currentVersion = await mapper.
-                FirstOrDefaultAsync<int>(string.Format(CQL.GetVersionForGivenKey, streamName));
+            var currentVersion = mapper.
+                FirstOrDefault<int>(string.Format(CQL.GetVersionForGivenKey, streamName));
             
             if (expectedStreamVersion >= 0)
             {

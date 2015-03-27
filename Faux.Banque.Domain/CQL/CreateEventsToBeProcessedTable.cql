@@ -2,7 +2,7 @@
 "EventStore"."EventsToBeProcessed" (
 id uuid,
 name varchar,
-version int,
+version bigint,
 version_time_stamp timestamp,
 data blob,
 processed boolean,

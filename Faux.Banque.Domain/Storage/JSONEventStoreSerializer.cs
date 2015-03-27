@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 using Faux.Banque.Domain.Interfaces;
+using System.Runtime.Serialization.Formatters;
 
 namespace Faux.Banque.Domain.Storage
 {
@@ -15,19 +16,20 @@ namespace Faux.Banque.Domain.Storage
         public JSONEventStoreSerializer()
         {
             serializer = new JsonSerializer();
-            serializer.PreserveReferencesHandling = PreserveReferencesHandling.All;
             serializer.TypeNameHandling = TypeNameHandling.All;
+            serializer.TypeNameAssemblyFormat = FormatterAssemblyStyle.Full;
         }
         public List<IEvent> DeserializeEvent(byte[] data)
         {
-            List<IEvent> result = new List<IEvent>();
+            List<IEvent> results = new List<IEvent>();
             using (MemoryStream stream = new MemoryStream(data))
             using (StreamReader reader = new StreamReader(stream))
             using (JsonReader jsonReader = new JsonTextReader(reader))
             {
-                result = serializer.Deserialize<List<IEvent>>(jsonReader);
+                var result = serializer.Deserialize<IEvent[]>(jsonReader);
+                results.AddRange(result);
             }
-            return result;   
+            return results;
         }
 
         public byte[] SerializeEvents(Interfaces.IEvent[] events)
@@ -39,6 +41,7 @@ namespace Faux.Banque.Domain.Storage
             using (JsonWriter jsonWriter = new JsonTextWriter(writer))
             {
                 serializer.Serialize(jsonWriter, events);
+                jsonWriter.Flush();
                 stream.Position = 0;
                 results = stream.ToArray();
             }

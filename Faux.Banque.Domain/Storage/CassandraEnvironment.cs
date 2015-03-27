@@ -25,7 +25,8 @@ namespace Faux.Banque.Domain.Storage
            MappingConfiguration.
                 Global.
                 Define(
-                       new Map<Record>()
+                       new Map<Record>().
+                            CaseSensitive()
                           .TableName("Events").
                           KeyspaceName("EventStore").
                           Column(r => r.Id, cm => cm.WithName("id").WithDbType<Guid>()).
@@ -36,7 +37,8 @@ namespace Faux.Banque.Domain.Storage
                           PartitionKey(e => e.Name).
                           ClusteringKey(Tuple.Create("version_time_stamp", SortOrder.Ascending),
                                         Tuple.Create("version", SortOrder.Unspecified)),
-                       new Map<RecordToBeProcesed>()
+                       new Map<RecordToBeProcesed>().
+                          CaseSensitive()
                           .TableName("Events").
                           KeyspaceName("EventStore").
                           PartitionKey("processed").
@@ -51,6 +53,7 @@ namespace Faux.Banque.Domain.Storage
                           Column(r => r.Data, cm => cm.WithName("data").WithDbType<byte[]>()).
                           Column(r => r.Processed, cm => cm.WithName("processed").WithDbType<bool>()),
                        new Map<EventStoreVersion>().
+                          CaseSensitive().
                           TableName("EventsVersionsToBeProcessed").
                           KeyspaceName("EventStore").
                           PartitionKey("version_time_stamp").
